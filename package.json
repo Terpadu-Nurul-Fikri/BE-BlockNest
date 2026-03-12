@@ -1,0 +1,25 @@
+{
+  "name": "be-blocknest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Terpadu-Nurul-Fikri/BE-BlockNest.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Terpadu-Nurul-Fikri/BE-BlockNest/issues"
+  },
+  "homepage": "https://github.com/Terpadu-Nurul-Fikri/BE-BlockNest#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
