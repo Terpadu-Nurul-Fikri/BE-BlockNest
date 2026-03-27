@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import authRouters from "./routes/authRoutes.js";
 import productRouters from "./routes/productRoutes.js";
 import categoryRouters from "./routes/categoryRoutes.js";
 import { connectDB, disconnectDB } from "./config/index.js";
@@ -18,8 +19,9 @@ app.use(express.urlencoded({ extended: true }));
 await connectDB();
 
 // routes
-app.use("/product", productRouters);
+app.use("/api", productRouters);
 app.use("/api/category", categoryRouters)
+app.use("/api", authRouters)
 
 app.get("/", (req, res) => {
   res.json("Halo! Server Express ini menggunakan ES Modules.");

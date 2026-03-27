@@ -77,12 +77,3 @@ export const getProductsByCategory = async (req, res) => {
         });
     }
 };
-
-
-export const deleteProduct = async (req, res) => {
-    try {
-        
-    } catch (error) {
-        
-    }
-}
