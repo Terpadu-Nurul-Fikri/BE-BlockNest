@@ -1,0 +1,4 @@
+# Uploads folder
+# This folder will contain uploaded files
+*
+!.gitkeep
