@@ -1,11 +1,17 @@
 
-
+import { prisma } from "../config";
 
 const register = async (req, res) => {
-    try {
-        res.json({ message: "register" });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    const { name, email, password } = req.body;
+
+    const userExists = await prisma.user.findUnique({
+        where: {
+            email: email
+        }
+    })
+
+    if (userExists) {
+        return res.status(400).json({ error: "User dengan alamat email ini sudah ada" });
     }
 }
 

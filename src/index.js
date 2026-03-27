@@ -1,16 +1,25 @@
 import "dotenv/config";
 import express from "express";
 import productRouters from "./routes/productRoutes.js";
+import categoryRouters from "./routes/categoryRoutes.js";
 import { connectDB, disconnectDB } from "./config/index.js";
+
+import cors from "cors";
 
 const app = express();
 const port = 3000;
 
-// connect DB dulu
+
+app.use(cors()); // <--- 2. Izinkan React mengambil data API
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// connection database
 await connectDB();
 
 // routes
 app.use("/product", productRouters);
+app.use("/api/category", categoryRouters)
 
 app.get("/", (req, res) => {
   res.json("Halo! Server Express ini menggunakan ES Modules.");
