@@ -1,166 +1,72 @@
-const { prisma } = require("../config/db");
-const productService = require("../services/productService");
-const { getCategoryMeta } = require("../utils/categoryMeta");
-const { mapProductToCard } = require("../utils/productMappers");
+// src/controllers/categoryController.js
+import { prisma } from "../config/index.js"; // Pastikan pakai .js
 
-const mapSortOption = (sortBy) => {
-  if (sortBy === "price-asc") {
-    return { sortBy: "price", order: "asc" };
-  }
+export const getCategoryData = async (req, res) => {
+    try {
+        const { slug } = req.params;
 
-  if (sortBy === "price-desc") {
-    return { sortBy: "price", order: "desc" };
-  }
-
-  if (sortBy === "rating") {
-    return { sortBy: "rating", order: "desc" };
-  }
-
-  if (sortBy === "newest") {
-    return { sortBy: "createdAt", order: "desc" };
-  }
-
-  return { sortBy: "salesCount", order: "desc" };
-};
-
-const getCategories = async (req, res) => {
-  try {
-    const categories = await prisma.category.findMany({
-      include: {
-        _count: {
-          select: {
-            products: {
-              where: { isActive: true },
+        // Ambil data kategori, produk, sekaligus gambar utama produknya
+        const categoryData = await prisma.category.findUnique({
+            where: { slug: slug },
+            include: {
+                products: {
+                    include: {
+                        images: {
+                            where: { isPrimary: true }, // Hanya ambil thumbnail
+                            take: 1
+                        }
+                    }
+                },
             },
-          },
-        },
-      },
-      orderBy: { name: "asc" },
-    });
+        });
 
-    const normalized = categories.map((category) => {
-      const meta = getCategoryMeta(category.slug, category);
+        // 1. CEK DULU DI SINI: Jika kategori tidak ada, langsung stop
+        if (!categoryData) {
+            return res.status(404).json({ success: false, message: "Category not found" });
+        }
 
-      return {
-        id: category.id,
-        slug: category.slug,
-        name: category.name,
-        label: meta.label,
-        headline: meta.headline,
-        description: meta.description,
-        seoDescription: meta.seoDescription,
-        heroImage: meta.heroImage,
-        heroAlt: meta.heroAlt,
-        ogImage: meta.ogImage,
-        itemCount: category._count.products,
-      };
-    });
+        // 2. Format data kategori (Meta)
+        const meta = {
+            label: categoryData.label,
+            slug: categoryData.slug,
+            headline: categoryData.headline,
+            description: categoryData.description,
+            seoDescription: categoryData.seoDescription,
+            heroImage: categoryData.heroImage,
+            heroAlt: categoryData.heroAlt,
+            ogImage: categoryData.ogImage,
+        };
 
-    res.json({ categories: normalized });
-  } catch (error) {
-    console.error("Get categories error:", error);
-    res.status(500).json({ error: "Failed to get categories" });
-  }
-};
+        // 3. Format data produk
+        const formattedProducts = categoryData.products.map((product) => {
+            // Ambil gambar pertama dari relasi tabel ProductImage
+            const primaryImage = product.images.length > 0 ? product.images[0] : null;
 
-const getCategoryBySlug = async (req, res) => {
-  try {
-    const { slug } = req.params;
+            return {
+                id: product.id,
+                name: product.name,
+                price: Number(product.price),
+                category: product.subCategory,
+                imageUrl: primaryImage ? primaryImage.imageUrl : "", // Map url gambar
+                imageAlt: primaryImage ? primaryImage.imageAlt : "", // Map alt gambar
+                rating: Number(product.rating),
+                reviewCount: product.reviewCount,
+                isNew: product.isNew,
+                slug: product.slug,
+            };
+        });
 
-    const category = await prisma.category.findUnique({
-      where: { slug },
-      include: {
-        _count: {
-          select: {
-            products: {
-              where: { isActive: true },
+        // 4. Kirim response JSON ke React
+        res.json({
+            success: true,
+            data: {
+                meta,
+                products: formattedProducts,
             },
-          },
-        },
-      },
-    });
+        });
 
-    if (!category) {
-      return res.status(404).json({ error: "Category not found" });
+    } catch (error) {
+        console.error('Error fetching category data:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
-
-    const meta = getCategoryMeta(slug, category);
-
-    res.json({
-      category: {
-        id: category.id,
-        slug: category.slug,
-        name: category.name,
-        label: meta.label,
-        headline: meta.headline,
-        description: meta.description,
-        seoDescription: meta.seoDescription,
-        heroImage: meta.heroImage,
-        heroAlt: meta.heroAlt,
-        ogImage: meta.ogImage,
-        itemCount: category._count.products,
-      },
-    });
-  } catch (error) {
-    console.error("Get category detail error:", error);
-    res.status(500).json({ error: "Failed to get category" });
-  }
-};
-
-const getCategoryProducts = async (req, res) => {
-  try {
-    const { slug } = req.params;
-    const { page = 1, limit = 12, search, minPrice, maxPrice, sortBy = "featured" } = req.query;
-
-    const category = await prisma.category.findUnique({
-      where: { slug },
-      select: { id: true, slug: true, name: true, description: true, image: true },
-    });
-
-    if (!category) {
-      return res.status(404).json({ error: "Category not found" });
-    }
-
-    const sorting = mapSortOption(sortBy);
-    const filters = {
-      page: parseInt(page, 10),
-      limit: parseInt(limit, 10),
-      search,
-      categoryId: category.id,
-      minPrice: minPrice ? parseFloat(minPrice) : undefined,
-      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
-      sortBy: sorting.sortBy,
-      order: sorting.order,
-    };
-
-    const result = await productService.getProducts(filters);
-    const meta = getCategoryMeta(slug, category);
-    const products = result.products.map(mapProductToCard);
-
-    res.json({
-      category: {
-        id: category.id,
-        slug: category.slug,
-        name: category.name,
-        label: meta.label,
-        headline: meta.headline,
-        description: meta.description,
-        seoDescription: meta.seoDescription,
-        heroImage: meta.heroImage,
-        heroAlt: meta.heroAlt,
-        ogImage: meta.ogImage,
-      },
-      products,
-      pagination: result.pagination,
-    });
-  } catch (error) {
-    console.error("Get category products error:", error);
-    res.status(500).json({ error: "Failed to get category products" });
-  }
-};
-
-module.exports = {
-  getCategories,
-  getCategoryBySlug,
-  getCategoryProducts,
 };
