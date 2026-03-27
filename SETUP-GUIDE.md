@@ -1,89 +1,62 @@
-# 📝 Setup Guide - BlockNest Backend
+# Setup Guide Menjalankan BlockNest (BE + FE)
 
-Panduan lengkap untuk setup backend BlockNest dari awal.
+Panduan ini dibuat berdasarkan kondisi project terbaru di workspace kamu, jadi command, endpoint, dan env variable sudah disesuaikan.
 
-## 🚀 Quick Setup
+## 1. Prasyarat
+
+- Node.js 20+ (disarankan LTS)
+- npm 10+
+- PostgreSQL 14+ (lokal) atau Docker Desktop
+
+Cek versi:
 
 ```bash
-# 1. Install dependencies
+node -v
+npm -v
+```
+
+## 2. Struktur Project yang Dijalankan
+
+- Backend: `BE-BlockNest`
+- Frontend: `FE-BlockNest`
+
+Arsitektur runtime:
+
+- FE (Vite React): `http://localhost:5173`
+- BE (Express): `http://localhost:3000`
+- DB (PostgreSQL): `localhost:5432`
+
+## 3. Setup Backend (BE-BlockNest)
+
+Masuk folder backend:
+
+```bash
+cd BE-BlockNest
+```
+
+### 3.1 Install dependencies
+
+```bash
 npm install
-
-# 2. Copy environment file
-cp .env.example .env
-
-# 3. Edit .env dengan database credentials kamu
-# DATABASE_URL="postgresql://postgres:postgres@localhost:5432/blocknest_db?schema=public"
-
-# 4. Generate Prisma Client
-npm run prisma:generate
-
-# 5. Run migrations
-npm run prisma:migrate
-
-# 6. Seed database (optional)
-npm run prisma:seed
-
-# 7. Start development server
-npm run dev
 ```
 
-Server akan berjalan di: http://localhost:4000
+### 3.2 Setup database PostgreSQL
 
-## 📋 Detailed Setup
+### Opsi A: PostgreSQL lokal
 
-### 1. Install Dependencies
+1. Buat database:
 
-```bash
-npm install
-```
-
-Dependencies yang akan terinstall:
-- **express** - Web framework
-- **@prisma/client** - Prisma ORM client
-- **bcrypt** - Password hashing
-- **jsonwebtoken** - JWT authentication
-- **cors** - CORS middleware
-- **dotenv** - Environment variables
-- **express-validator** - Input validation
-- **multer** - File upload
-- **nodemon** - Auto-reload (dev)
-- **prisma** - Prisma CLI (dev)
-
-### 2. Setup Database
-
-#### Option A: Menggunakan PostgreSQL lokal
-
-**Install PostgreSQL:**
-```bash
-# Windows (chocolatey)
-choco install postgresql
-
-# Mac (homebrew)
-brew install postgresql@15
-brew services start postgresql@15
-
-# Linux (Ubuntu/Debian)
-sudo apt install postgresql postgresql-contrib
-sudo systemctl start postgresql
-```
-
-**Create database:**
-```bash
-# Login ke PostgreSQL
-psql -U postgres
-
-# Create database
+```sql
 CREATE DATABASE blocknest_db;
-
-# Exit
-\q
 ```
 
-#### Option B: Menggunakan Docker
+2. Pastikan user/password PostgreSQL kamu valid.
 
-**docker-compose.yml** (di root project):
+### Opsi B: Docker
+
+Buat file `docker-compose.yml` (opsional, di folder `BE-BlockNest`):
+
 ```yaml
-version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
@@ -101,409 +74,221 @@ volumes:
   postgres_data:
 ```
 
-**Start Docker:**
+Jalankan:
+
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
-### 3. Configure Environment Variables
+### 3.3 Setup environment backend
 
-**Copy .env.example:**
+Di Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Di Git Bash:
+
 ```bash
 cp .env.example .env
 ```
 
-**Edit .env:**
+Edit `.env` dan pastikan minimal seperti ini:
+
 ```env
-# Application
 NODE_ENV=development
-PORT=4000
-
-# Database (adjust sesuai setup kamu)
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/blocknest_db?schema=public"
-
-# JWT
-JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
-JWT_EXPIRES_IN="7d"
-
-# Frontend URL (untuk CORS)
+PORT=3000
+DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/blocknest_db?schema=public"
+JWT_SECRET="ganti-dengan-secret-yang-kuat"
+JWT_EXPIRE="7d"
 FRONTEND_URL="http://localhost:5173"
-
-# File Upload
-UPLOAD_DIR="./uploads"
-MAX_FILE_SIZE=5242880
 ```
 
-**Penting:** Ganti `JWT_SECRET` dengan string random yang aman!
+Catatan penting:
 
-Generate JWT secret:
-```bash
-# Node.js
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+- Di kode backend saat ini, auth membaca `JWT_EXPIRE` (bukan `JWT_EXPIRES_IN`).
+- Jika pakai `.env.example` lama, tambahkan manual baris `JWT_EXPIRE="7d"`.
 
-# atau online
-# https://www.random.org/strings/
-```
-
-### 4. Setup Prisma
-
-**Generate Prisma Client:**
-```bash
-npm run prisma:generate
-```
-
-**Create database tables:**
-```bash
-npm run prisma:migrate
-```
-
-Command ini akan:
-- Membaca `src/prisma/schema.prisma`
-- Membuat migration file
-- Apply migration ke database
-- Create tables: users, products, orders, dll.
-
-**Verify tables:**
-```bash
-# Open Prisma Studio (database GUI)
-npm run prisma:studio
-```
-
-Browser akan open di http://localhost:5555
-
-### 5. Seed Database (Optional)
-
-Seed database dengan data sample:
+### 3.4 Jalankan migrasi dan seed
 
 ```bash
-npm run prisma:seed
+npm run db:migrate
+npm run db:seed
 ```
 
-Data yang akan dibuat:
-- **Admin user**: admin@blocknest.com / admin123
-- **Regular user**: user@blocknest.com / user123
-- **Categories**: Living Room, Bedroom, Dining, Office, Outdoor, Sale
-- **Sample products**: produk seed sesuai slug dan kebutuhan display FE
+Yang akan terisi dari seed:
 
-### 6. Start Development Server
+- Category: `living-room`, `bedroom`, `dining`
+- Product sample sesuai category
+
+### 3.5 Jalankan backend
 
 ```bash
 npm run dev
 ```
 
-Server akan start dengan nodemon (auto-reload):
-- URL: http://localhost:4000
-- API Routes: /api/auth, /api/products, /api/orders
+Backend aktif di `http://localhost:3000`.
 
-### 7. Test API
+## 4. Setup Frontend (FE-BlockNest)
 
-**Test dengan cURL:**
-```bash
-# Health check
-curl http://localhost:4000
-
-# Register
-curl -X POST http://localhost:4000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123","name":"Test User"}'
-
-# Login
-curl -X POST http://localhost:4000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}'
-
-# Get products
-curl http://localhost:4000/api/products
-```
-
-**Test dengan Thunder Client (VS Code):**
-1. Install Thunder Client extension
-2. Create new request
-3. Set URL: http://localhost:4000/api/products
-4. Click Send
-
-## 🔧 Development Workflow
-
-### Membuat Migration Baru
-
-Setiap kali mengubah `schema.prisma`:
+Buka terminal baru, lalu masuk folder frontend:
 
 ```bash
-# 1. Edit src/prisma/schema.prisma
-# 2. Create migration
-npm run prisma:migrate
-
-# Prisma akan tanya nama migration
-# Example: "add_product_rating"
-
-# 3. Prisma akan generate & apply migration
-# 4. Restart server (nodemon auto-restart)
+cd FE-BlockNest
 ```
 
-### Menambah Field Baru
-
-**Example: Tambah field `phone` di User:**
-
-1. Edit `src/prisma/schema.prisma`:
-```prisma
-model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  password String
-  name     String
-  phone    String?  // ← Field baru
-  // ... other fields
-}
-```
-
-2. Create migration:
-```bash
-npm run prisma:migrate
-# Name: "add_user_phone_field"
-```
-
-3. Update controller untuk handle field baru
-
-### Reset Database (HATI-HATI!)
+Install dependencies:
 
 ```bash
-# Hapus semua data & migrations
-npm run prisma:migrate reset
-
-# Re-run migrations
-npm run prisma:migrate
-
-# Seed lagi
-npm run prisma:seed
-```
-
-**WARNING:** Command ini akan **DELETE ALL DATA**!
-
-## 🧪 Testing Endpoints
-
-### Authentication Flow
-
-**1. Register:**
-```bash
-POST /api/auth/register
-{
-  "email": "user@example.com",
-  "password": "password123",
-  "name": "John Doe",
-  "phone": "081234567890"
-}
-
-# Response:
-{
-  "message": "User registered successfully",
-  "user": { ... },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
-**2. Login:**
-```bash
-POST /api/auth/login
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-
-# Response:
-{
-  "message": "Login successful",
-  "user": { ... },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
-**3. Get Profile:**
-```bash
-GET /api/auth/profile
-Authorization: Bearer <token>
-
-# Response:
-{
-  "user": {
-    "id": "...",
-    "email": "user@example.com",
-    "name": "John Doe",
-    "role": "USER"
-  }
-}
-```
-
-### Product Endpoints
-
-**Get all products:**
-```bash
-GET /api/products
-GET /api/products?page=1&limit=10
-GET /api/products?search=sofa
-GET /api/products?categoryId=<uuid>
-GET /api/products?minPrice=1000000&maxPrice=5000000
-GET /api/products?sortBy=price&order=asc
-```
-
-**Get single product:**
-```bash
-GET /api/products/<product-id>
-```
-
-**Create product (Admin only):**
-```bash
-POST /api/products
-Authorization: Bearer <admin-token>
-{
-  "name": "Modern Sofa",
-  "slug": "modern-sofa",
-  "description": "Beautiful sofa",
-  "price": 3500000,
-  "stock": 10,
-  "sku": "SOFA-001",
-  "categoryId": "<category-uuid>"
-}
-```
-
-### Order Endpoints
-
-**Create order:**
-```bash
-POST /api/orders
-Authorization: Bearer <token>
-{
-  "addressId": "<address-uuid>",
-  "paymentMethod": "bank_transfer",
-  "notes": "Deliver in the morning"
-}
-```
-
-**Get user orders:**
-```bash
-GET /api/orders
-Authorization: Bearer <token>
-```
-
-## 📊 Database Schema Overview
-
-### Users & Auth
-- **users** - User accounts
-- **addresses** - Shipping addresses
-
-### Products
-- **categories** - Product categories
-- **products** - Product catalog
-- **product_images** - Product images
-
-### Shopping
-- **carts** - User shopping carts
-- **cart_items** - Items in cart
-
-### Orders
-- **orders** - Customer orders
-- **order_items** - Order line items
-
-### Reviews
-- **reviews** - Product reviews & ratings
-
-## 🐛 Troubleshooting
-
-### Error: Port 4000 already in use
-
-```bash
-# Windows
-netstat -ano | findstr :4000
-taskkill /PID <PID> /F
-
-# Mac/Linux
-lsof -i :4000
-kill -9 <PID>
-
-# Atau ganti PORT di .env
-PORT=4001
-```
-
-### Error: Database connection failed
-
-```bash
-# Check PostgreSQL status
-# Windows
-sc query postgresql
-
-# Mac
-brew services list
-
-# Linux
-sudo systemctl status postgresql
-
-# Check DATABASE_URL di .env
-cat .env | grep DATABASE_URL
-
-# Test connection
-psql -U postgres -d blocknest_db
-```
-
-### Error: Prisma Client not generated
-
-```bash
-npm run prisma:generate
-```
-
-### Error: Module not found
-
-```bash
-# Clear node_modules
-rm -rf node_modules package-lock.json
-
-# Reinstall
 npm install
 ```
 
-### Error: Migration failed
+Jalankan frontend:
 
 ```bash
-# Reset database (CAUTION: deletes data!)
-npm run prisma:migrate reset
-
-# Or manually drop tables via Prisma Studio
-npm run prisma:studio
+npm run dev
 ```
 
-## 📚 Useful Commands
+Frontend aktif di `http://localhost:5173`.
+
+## 5. Validasi Integrasi FE ↔ BE
+
+Setelah BE dan FE aktif bersamaan, test alur berikut:
+
+1. Buka `http://localhost:5173/register`
+2. Register user baru
+3. Login di `http://localhost:5173/login`
+4. Buka `http://localhost:5173/profile`
+5. Pastikan profile tampil dan logout berfungsi
+
+## 6. Test API Manual (opsional)
+
+### 6.1 Register
 
 ```bash
-# Development
-npm run dev              # Start with auto-reload
-npm start                # Start production
-
-# Prisma
-npm run prisma:generate  # Generate Prisma Client
-npm run prisma:migrate   # Run migrations
-npm run prisma:studio    # Open database GUI
-npm run prisma:seed      # Seed database
-
-# Database
-psql -U postgres         # PostgreSQL CLI
-docker-compose up -d     # Start Docker
-docker-compose down      # Stop Docker
-docker logs blocknest_postgres  # View logs
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user1@example.com","password":"password123","firstName":"Budi","lastName":"Setiawan","phone":"081234567899"}'
 ```
 
-## 🎯 Next Steps
+### 6.2 Login
 
-1. ✅ Setup complete!
-2. 📖 Baca [README.md](./README.md) untuk API documentation
-3. 🧪 Test semua endpoints
-4. 💻 Start building features!
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user1@example.com","password":"password123"}'
+```
 
-## 📝 Notes
+Response login akan mengembalikan `token`.
 
-- **Development**: Gunakan `npm run dev` (auto-reload)
-- **Production**: Gunakan `npm start`
-- **Prisma Studio**: Tool yang bagus untuk view/edit database
-- **Postman/Thunder Client**: Tools untuk test API
-- **Git**: Jangan commit `.env` file!
+### 6.3 Profile (butuh token)
 
----
+```bash
+curl -X GET http://localhost:3000/api/auth/profile \
+  -H "Authorization: Bearer <TOKEN_LOGIN>"
+```
 
-**Happy Coding! 🚀**
+### 6.4 Product list
+
+```bash
+curl http://localhost:3000/product
+```
+
+## 7. Command Harian yang Sering Dipakai
+
+Backend:
+
+```bash
+npm run dev
+npm run db:migrate
+npm run db:deploy
+npm run db:seed
+```
+
+Frontend:
+
+```bash
+npm run dev
+npm run build
+npm run lint
+```
+
+## 8. Troubleshooting
+
+### 8.1 Port backend bentrok
+
+Default backend: `3000`
+
+Windows:
+
+```powershell
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+```
+
+Alternatif: ganti `PORT` di `.env`.
+
+### 8.2 Port frontend bentrok
+
+Default frontend: `5173`
+
+Windows:
+
+```powershell
+netstat -ano | findstr :5173
+taskkill /PID <PID> /F
+```
+
+### 8.3 Gagal konek database
+
+Checklist:
+
+- PostgreSQL running
+- `DATABASE_URL` benar (user/password/port/db)
+- Database `blocknest_db` sudah dibuat
+
+Tes cepat:
+
+```bash
+psql -U postgres -d blocknest_db
+```
+
+### 8.4 Error JWT saat login/profile
+
+Pastikan di `.env` ada:
+
+```env
+JWT_SECRET="secret-kamu"
+JWT_EXPIRE="7d"
+```
+
+Lalu restart backend.
+
+### 8.5 Error setelah pull terbaru
+
+Jalankan ulang:
+
+```bash
+npm install
+npm run db:migrate
+```
+
+Jika perlu seed ulang:
+
+```bash
+npm run db:seed
+```
+
+## 9. Checklist Selesai Setup
+
+- [ ] `npm install` sukses di BE
+- [ ] `.env` backend sudah benar
+- [ ] `db:migrate` sukses
+- [ ] `db:seed` sukses
+- [ ] BE jalan di `http://localhost:3000`
+- [ ] `npm install` sukses di FE
+- [ ] FE jalan di `http://localhost:5173`
+- [ ] Register/Login/Profile sukses dari FE
+
+Kalau semua checklist centang, project sudah siap dipakai development harian.
