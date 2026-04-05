@@ -11,7 +11,7 @@ const register = async (req, res) => {
     })
 
     if (userExists) {
-        return res.status(400).json({ error: "User dengan alamat email ini sudah ada" });
+        return res.status(400).json({ error: "User already exists with this email" });
     }
 
     const salt = await bcrypt.genSalt(10);
