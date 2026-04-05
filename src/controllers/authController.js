@@ -1,5 +1,6 @@
 
-import { prisma } from "../config";
+import { prisma } from "../config/index.js";
+import bcrypt from "bcryptjs";
 
 const register = async (req, res) => {
     const { name, email, password } = req.body;
@@ -39,9 +40,38 @@ const register = async (req, res) => {
 }
 
 const login = async (req, res) => {
+    const { email, password } = req.body;
+
+    const user = await prisma.user.findUnique({
+        where: {
+            email: email
+        }
+    })
+    if (!user) {
+        return res.status(400).json({ error: "Invalid email or password" });
+    }
+
+    // verify password
+    const validatorPass = await bcrypt.compare(password, user.password);
+
+    if (!validatorPass) {
+        return res.status(400).json({ error: "Invalid email or password" });
+    }
+
+    res.status(201).json({
+        status: "success",
+        data: {
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+            }
+        }
+    })
+
 
 }
 
 
 
-export { register };
+export { register, login };
