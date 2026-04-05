@@ -12,13 +12,13 @@ import {
 const router = express.Router();
 
 // PUBLIC (frontend)
-router.get("/banners/active", getActiveBanners);
+router.get("/active", getActiveBanners);
 
 // ADMIN
-router.get("/banners", getAllBanners);
-router.get("/banners/:id", getBannerById);
-router.post("/banners", createBanner);
-router.put("/banners/:id", updateBanner);
-router.delete("/banners/:id", deleteBanner);
+router.get("/", getAllBanners);
+router.get("/:id", getBannerById);
+router.post("/", createBanner);
+router.put("/:id", updateBanner);
+router.delete("/:id", deleteBanner);
 
 export default router;
