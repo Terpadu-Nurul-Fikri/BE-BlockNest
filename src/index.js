@@ -6,18 +6,28 @@ import authRouters from "./routes/authRoutes.js";
 import productRouters from "./routes/productRoutes.js";
 import categoryRouters from "./routes/categoryRoutes.js";
 import bannerRouters from "./routes/bannerRoutes.js";
+import webhookRouters from "./routes/webhookRoutes.js";
+import reviewRouters from "./routes/reviewRoutes.js";
 
 // import database connection functions
 import { connectDB, disconnectDB } from "./config/index.js";
 
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const port = 3000;
 
 
 app.use(cors()); // <--- 2. Izinkan React mengambil data API
-app.use(express.json());
+app.use(cookieParser());
+app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      req.rawBody = buf.toString("utf8");
+    },
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 
 // connection database
@@ -28,9 +38,27 @@ app.use("/api", productRouters);
 app.use("/api/category", categoryRouters)
 app.use("/api/banners", bannerRouters);
 app.use("/api/auth", authRouters);
+app.use("/api/webhooks", webhookRouters);
+app.use("/api/reviews", reviewRouters);
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "OK",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 app.get("/", (req, res) => {
   res.json("Halo! Server Express ini menggunakan ES Modules.");
+});
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Endpoint tidak ditemukan: ${req.method} ${req.originalUrl}`,
+  });
 });
 
 // start server

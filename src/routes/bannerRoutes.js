@@ -8,17 +8,22 @@ import {
     updateBanner,
     deleteBanner,
 } from "../controllers/bannerController.js";
+import {
+    authorizeRoles,
+    redirectGuestToLogin,
+} from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
+const adminOnly = [redirectGuestToLogin, authorizeRoles("ADMIN")];
 
 // PUBLIC (frontend)
 router.get("/active", getActiveBanners);
 
 // ADMIN
-router.get("/", getAllBanners);
-router.get("/:id", getBannerById);
-router.post("/", createBanner);
-router.put("/:id", updateBanner);
-router.delete("/:id", deleteBanner);
+router.get("/", ...adminOnly, getAllBanners);
+router.get("/:id", ...adminOnly, getBannerById);
+router.post("/", ...adminOnly, createBanner);
+router.put("/:id", ...adminOnly, updateBanner);
+router.delete("/:id", ...adminOnly, deleteBanner);
 
 export default router;

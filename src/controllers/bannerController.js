@@ -1,21 +1,92 @@
 // src/controllers/bannerController.js
 import { prisma } from "../config/index.js";
 
+const sendError = (res, status, message, detail) => {
+  return res.status(status).json({
+    success: false,
+    message,
+    detail: process.env.NODE_ENV === "development" ? detail : undefined,
+  });
+};
+
+const buildBannerPayload = (body, isUpdate = false) => {
+  const payload = {};
+
+  const assignIfDefined = (key, value) => {
+    if (value !== undefined) {
+      payload[key] = value;
+    }
+  };
+
+  assignIfDefined("title", body.title);
+  assignIfDefined("type", body.type);
+  assignIfDefined("imageUrl", body.imageUrl);
+  assignIfDefined("imageAlt", body.imageAlt);
+  assignIfDefined("content", body.content);
+  assignIfDefined("linkUrl", body.linkUrl);
+  assignIfDefined("isActive", body.isActive);
+
+  if (body.startDate !== undefined) {
+    payload.startDate = body.startDate ? new Date(body.startDate) : null;
+  } else if (!isUpdate) {
+    payload.startDate = null;
+  }
+
+  if (body.endDate !== undefined) {
+    payload.endDate = body.endDate ? new Date(body.endDate) : null;
+  } else if (!isUpdate) {
+    payload.endDate = null;
+  }
+
+  return payload;
+};
+
+const validateBannerPayload = (body, isUpdate = false) => {
+  if (!isUpdate) {
+    if (!body.title || !body.type) {
+      return "Field wajib: title dan type";
+    }
+  }
+
+  if (body.startDate && Number.isNaN(new Date(body.startDate).getTime())) {
+    return "Format startDate tidak valid";
+  }
+
+  if (body.endDate && Number.isNaN(new Date(body.endDate).getTime())) {
+    return "Format endDate tidak valid";
+  }
+
+  if (body.startDate && body.endDate) {
+    const start = new Date(body.startDate);
+    const end = new Date(body.endDate);
+
+    if (start > end) {
+      return "startDate tidak boleh lebih besar dari endDate";
+    }
+  }
+
+  return null;
+};
+
 // CREATE Banner
 export const createBanner = async (req, res) => {
   try {
-    const data = req.body;
+    const validationError = validateBannerPayload(req.body);
+    if (validationError) {
+      return sendError(res, 400, validationError);
+    }
 
     const banner = await prisma.banner.create({
-      data,
+      data: buildBannerPayload(req.body, false),
     });
 
-    res.status(201).json({
-      message: "Banner created successfully",
+    return res.status(201).json({
+      success: true,
+      message: "Banner berhasil dibuat",
       data: banner,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return sendError(res, 500, "Gagal membuat banner", error.message);
   }
 };
 
@@ -26,9 +97,12 @@ export const getAllBanners = async (req, res) => {
       orderBy: { createdAt: "desc" },
     });
 
-    res.json(banners);
+    return res.json({
+      success: true,
+      data: banners,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return sendError(res, 500, "Gagal mengambil data banner", error.message);
   }
 };
 
@@ -58,9 +132,12 @@ export const getActiveBanners = async (req, res) => {
       orderBy: { createdAt: "desc" },
     });
 
-    res.json(banners);
+    return res.json({
+      success: true,
+      data: banners,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return sendError(res, 500, "Gagal mengambil banner aktif", error.message);
   }
 };
 
@@ -74,12 +151,15 @@ export const getBannerById = async (req, res) => {
     });
 
     if (!banner) {
-      return res.status(404).json({ message: "Banner not found" });
+      return sendError(res, 404, "Banner tidak ditemukan");
     }
 
-    res.json(banner);
+    return res.json({
+      success: true,
+      data: banner,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return sendError(res, 500, "Gagal mengambil detail banner", error.message);
   }
 };
 
@@ -88,17 +168,28 @@ export const updateBanner = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const validationError = validateBannerPayload(req.body, true);
+    if (validationError) {
+      return sendError(res, 400, validationError);
+    }
+
+    const existingBanner = await prisma.banner.findUnique({ where: { id } });
+    if (!existingBanner) {
+      return sendError(res, 404, "Banner tidak ditemukan");
+    }
+
     const banner = await prisma.banner.update({
       where: { id },
-      data: req.body,
+      data: buildBannerPayload(req.body, true),
     });
 
-    res.json({
-      message: "Banner updated successfully",
+    return res.json({
+      success: true,
+      message: "Banner berhasil diperbarui",
       data: banner,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return sendError(res, 500, "Gagal memperbarui banner", error.message);
   }
 };
 
@@ -107,12 +198,20 @@ export const deleteBanner = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const existingBanner = await prisma.banner.findUnique({ where: { id } });
+    if (!existingBanner) {
+      return sendError(res, 404, "Banner tidak ditemukan");
+    }
+
     await prisma.banner.delete({
       where: { id },
     });
 
-    res.json({ message: "Banner deleted successfully" });
+    return res.json({
+      success: true,
+      message: "Banner berhasil dihapus",
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return sendError(res, 500, "Gagal menghapus banner", error.message);
   }
 };
