@@ -6,6 +6,7 @@ import authRouters from "./routes/authRoutes.js";
 import productRouters from "./routes/productRoutes.js";
 import categoryRouters from "./routes/categoryRoutes.js";
 import bannerRouters from "./routes/bannerRoutes.js";
+import usersRouters from "./routes/usersRotes.js";
 
 // import database connection functions
 import { connectDB, disconnectDB } from "./config/index.js";
@@ -13,8 +14,7 @@ import { connectDB, disconnectDB } from "./config/index.js";
 import cors from "cors";
 
 const app = express();
-const port = 3000;
-
+const port = process.env.PORT || 3000;
 
 app.use(cors()); // <--- 2. Izinkan React mengambil data API
 app.use(express.json());
@@ -25,9 +25,10 @@ await connectDB();
 
 // routes
 app.use("/api", productRouters);
-app.use("/api/category", categoryRouters)
+app.use("/api/category", categoryRouters);
 app.use("/api/banners", bannerRouters);
 app.use("/api/auth", authRouters);
+app.use("/api/users", usersRouters);
 
 app.get("/", (req, res) => {
   res.json("Halo! Server Express ini menggunakan ES Modules.");
