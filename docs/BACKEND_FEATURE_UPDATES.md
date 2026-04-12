@@ -96,8 +96,8 @@ Constraint:
 `src/index.js` diupdate agar:
 
 - register route webhook `app.use("/api/webhooks", webhookRouters)`
+- register route review `app.use("/api/reviews", reviewRouters)`
 - simpan raw body via `express.json({ verify })` untuk validasi signature webhook
-- expose endpoint health check `GET /health`
 - tambah fallback 404 JSON untuk endpoint yang tidak ditemukan
 
 ## 5. Langkah Setelah Perubahan

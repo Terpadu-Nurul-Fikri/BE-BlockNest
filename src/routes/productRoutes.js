@@ -24,9 +24,9 @@ router.post("/admin/products", ...adminOnly, createProduct);
 router.put("/admin/products/:id", ...adminOnly, updateProduct);
 router.delete("/admin/products/:id", ...adminOnly, deleteProduct);
 
-// Endpoint: GET /api/category/:slug
+// Endpoint: GET /api/products/category/:slug
 router.get(
-    "/category/:slug",
+    "/products/category/:slug",
     redirectGuestToLogin,
     authorizeRoles("CUSTOMER", "ADMIN"),
     getProductsByCategory
