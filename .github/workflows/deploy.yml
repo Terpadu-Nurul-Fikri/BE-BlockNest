@@ -11,6 +11,8 @@ on:
 jobs:
     build-and-scan:
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -24,7 +26,7 @@ jobs:
                   docker tag be-blocknest:${{ github.sha }} be-blocknest:latest
 
             - name: Scan Docker image for vulnerabilities
-              uses: aquasecurity/trivy-action@master
+              uses: aquasecurity/trivy-action@0.30.0
               with:
                   image-ref: be-blocknest:${{ github.sha }}
                   format: "table"
@@ -56,6 +58,7 @@ jobs:
         runs-on: ubuntu-latest
         needs: build-and-scan
         if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && success()
+        permissions: {}
 
         steps:
             - name: Download Docker Image

@@ -7,6 +7,8 @@ import productRouters from "./routes/productRoutes.js";
 import categoryRouters from "./routes/categoryRoutes.js";
 import bannerRouters from "./routes/bannerRoutes.js";
 import usersRouters from "./routes/usersRoutes.js";
+import webhookRouters from "./routes/webhookRoutes.js";
+import reviewRouters from "./routes/reviewRoutes.js";
 
 // import database connection functions
 import { connectDB, disconnectDB } from "./config/index.js";
@@ -37,6 +39,8 @@ app.use("/api/category", categoryRouters);
 app.use("/api/banners", bannerRouters);
 app.use("/api/auth", authRouters);
 app.use("/api/users", usersRouters);
+app.use("/api/webhooks", webhookRouters);
+app.use("/api/reviews", reviewRouters);
 
 app.get("/", (req, res) => {
   res.json("Halo! Server Express ini menggunakan ES Modules.");

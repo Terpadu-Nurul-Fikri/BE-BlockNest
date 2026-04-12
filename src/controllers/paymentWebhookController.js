@@ -31,7 +31,8 @@ const mapOrderStatus = (transactionStatus, paymentStatus) => {
 const validateSignature = (req) => {
   const secret = process.env.PAYMENT_WEBHOOK_SECRET;
   if (!secret) {
-    return true;
+    console.error("PAYMENT_WEBHOOK_SECRET is not configured; rejecting webhook signature validation.");
+    return false;
   }
 
   const incomingSignature = req.headers["x-webhook-signature"] || req.body.signature;
@@ -123,6 +124,11 @@ export const handlePaymentWebhook = async (req, res) => {
         });
       }
 
+      const existingOrder = await tx.order.findUnique({ where: { id: orderId } });
+      if (!existingOrder) {
+        throw Object.assign(new Error(`Order not found: ${orderId}`), { code: "ORDER_NOT_FOUND" });
+      }
+
       const order = await tx.order.update({
         where: { id: orderId },
         data: { status: orderStatus },
@@ -142,6 +148,12 @@ export const handlePaymentWebhook = async (req, res) => {
     });
   } catch (error) {
     console.error("Payment webhook error:", error);
+    if (error.code === "ORDER_NOT_FOUND") {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
     return res.status(500).json({
       success: false,
       message: "Terjadi kesalahan saat memproses webhook",

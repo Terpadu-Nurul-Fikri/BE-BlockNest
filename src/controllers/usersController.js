@@ -32,7 +32,7 @@ class UsersController {
 
       const user = await prisma.user.findUnique({
         where: {
-          id: Number(id),
+          id,
         },
         select: {
           id: true,
@@ -69,7 +69,7 @@ class UsersController {
 
       const user = await prisma.user.update({
         where: {
-          id: Number(id),
+          id,
         },
         data: {
           name,
@@ -98,7 +98,7 @@ class UsersController {
 
       await prisma.user.delete({
         where: {
-          id: Number(id),
+          id,
         },
       });
 
