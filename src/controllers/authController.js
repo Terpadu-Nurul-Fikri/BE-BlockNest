@@ -1,6 +1,7 @@
 
 import { prisma } from "../config/index.js";
 import bcrypt from "bcryptjs";
+import generateToken from "../utils/generateToken.js";
 
 const register = async (req, res) => {
     const { name, email, password } = req.body;
@@ -27,13 +28,17 @@ const register = async (req, res) => {
         }
     })
 
+    const token = generateToken(user.id);
+
     res.status(201).json({
         status: "success",
         data: {
+            token,
             user: {
                 id: user.id,
                 name: user.name,
                 email: user.email,
+                role: user.role,
             }
         }
     })
@@ -58,13 +63,17 @@ const login = async (req, res) => {
         return res.status(400).json({ error: "Invalid email or password" });
     }
 
+    const token = generateToken(user.id);
+
     res.status(201).json({
         status: "success",
         data: {
+            token,
             user: {
                 id: user.id,
                 name: user.name,
                 email: user.email,
+                role: user.role,
             }
         }
     })

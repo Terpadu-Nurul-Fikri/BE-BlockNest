@@ -55,6 +55,7 @@ model User {
   // Relasi
   cartItems CartItem[]
   orders    Order[]
+  reviews   Review[]
 
   @@map("users")
 }
@@ -99,8 +100,28 @@ model Product {
   images     ProductImage[] // <-- Relasi baru ke banyak gambar
   cartItems  CartItem[]
   orderItems OrderItem[]
+  reviews    Review[]
 
   @@map("products")
+}
+
+// 3.6 Model Reviews (Ulasan produk oleh user)
+model Review {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  rating    Int
+  comment   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relasi
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Satu user hanya boleh satu review per produk
+  @@unique([userId, productId])
+  @@map("reviews")
 }
 
 
@@ -212,3 +233,4 @@ model Banner {
 
   @@map("banners")
 }
+
