@@ -1,5 +1,7 @@
-import crypto from "node:crypto";
+// controllers/paymentWebhookController.js
 import { prisma } from "../config/index.js";
+import errorHandler from "../utils/errorHandler.js";
+import { validateSignature, validateWebhookPayload } from "../utils/validator.js";
 
 const mapGatewayStatus = (transactionStatus, fraudStatus) => {
   if (["settlement", "capture"].includes(transactionStatus)) {
@@ -8,11 +10,9 @@ const mapGatewayStatus = (transactionStatus, fraudStatus) => {
     }
     return "SUCCESS";
   }
-
   if (["deny", "cancel", "expire", "failure"].includes(transactionStatus)) {
     return "FAILED";
   }
-
   return "PENDING";
 };
 
@@ -20,48 +20,24 @@ const mapOrderStatus = (transactionStatus, paymentStatus) => {
   if (paymentStatus === "SUCCESS") {
     return "PAID";
   }
-
   if (["deny", "cancel", "expire", "failure"].includes(transactionStatus)) {
     return "CANCELLED";
   }
-
   return "PENDING";
-};
-
-const validateSignature = (req) => {
-  const secret = process.env.PAYMENT_WEBHOOK_SECRET;
-  if (!secret) {
-    return true;
-  }
-
-  const incomingSignature = req.headers["x-webhook-signature"] || req.body.signature;
-  if (!incomingSignature) {
-    return false;
-  }
-
-  const rawBody = req.rawBody || JSON.stringify(req.body);
-  const expectedSignature = crypto
-    .createHmac("sha256", secret)
-    .update(rawBody)
-    .digest("hex");
-
-  if (expectedSignature.length !== String(incomingSignature).length) {
-    return false;
-  }
-
-  return crypto.timingSafeEqual(
-    Buffer.from(expectedSignature),
-    Buffer.from(String(incomingSignature))
-  );
 };
 
 export const handlePaymentWebhook = async (req, res) => {
   try {
+    // 1. Validasi Keamanan (Signature)
     if (!validateSignature(req)) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid webhook signature",
-      });
+      return errorHandler(res, "Invalid Signature", 401, "Akses ditolak: Invalid webhook signature");
+    }
+
+    // 2. Validasi Input Payload
+    const validationError = validateWebhookPayload(req.body);
+    if (validationError) {
+      // Menggunakan status 422 untuk Validation Error sesuai materi PDF
+      return errorHandler(res, validationError, 422, "Validasi gagal: Payload tidak lengkap");
     }
 
     const {
@@ -73,17 +49,11 @@ export const handlePaymentWebhook = async (req, res) => {
       gross_amount: grossAmount,
     } = req.body;
 
-    if (!orderId || !transactionStatus) {
-      return res.status(400).json({
-        success: false,
-        message: "Payload webhook tidak lengkap",
-      });
-    }
-
     const paymentStatus = mapGatewayStatus(transactionStatus, fraudStatus);
     const orderStatus = mapOrderStatus(transactionStatus, paymentStatus);
     const amount = grossAmount === undefined ? 0 : Number(grossAmount);
 
+    // 3. Logika Bisnis (Database Transaction)
     const result = await prisma.$transaction(async (tx) => {
       let payment = null;
 
@@ -131,20 +101,19 @@ export const handlePaymentWebhook = async (req, res) => {
       return { payment, order };
     });
 
+    // 4. Response Sukses
     return res.status(200).json({
       success: true,
-      message: "Webhook payment diproses",
+      message: "Webhook payment berhasil diproses",
       data: {
         orderId: result.order.id,
         orderStatus: result.order.status,
         paymentStatus: result.payment.paymentStatus,
       },
     });
+
   } catch (error) {
-    console.error("Payment webhook error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan saat memproses webhook",
-    });
+    // 5. Penanganan Unexpected Error (Bug Server / Database) menggunakan status 500
+    return errorHandler(res, error, 500, "Terjadi kesalahan sistem saat memproses webhook");
   }
 };
