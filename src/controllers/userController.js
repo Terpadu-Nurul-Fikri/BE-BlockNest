@@ -1,163 +1,106 @@
-import bcrypt from "bcryptjs";
 import { prisma } from "../config/index.js";
+import bcrypt from "bcryptjs";
 
-const splitName = (fullName = "") => {
-    const trimmed = fullName.trim();
-
-    if (!trimmed) {
-        return { firstName: "", lastName: "" };
-    }
-
-    const [firstName, ...rest] = trimmed.split(/\s+/);
-
-    return {
-        firstName,
-        lastName: rest.join(" "),
-    };
-};
-
-const sanitizeUser = (user) => {
-    const { password, ...safeUser } = user;
-    const { firstName, lastName } = splitName(user.name);
-
-    return {
-        ...safeUser,
-        firstName,
-        lastName,
-    };
-};
-
-const buildNameFromParts = (firstName, lastName) => {
-    return [firstName, lastName].filter(Boolean).join(" ").trim();
-};
-
-export const getUserProfile = async (req, res) => {
+class UsersController {
+  // 🔍 GET PROFILE (user login)
+  async profile(req, res) {
     try {
-        if (!req.user?.id) {
-            return res.status(401).json({ error: "Not authorized" });
-        }
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+        },
+      });
 
-        const user = await prisma.user.findUnique({
-            where: { id: req.user.id },
+      if (!user) {
+        return res.status(404).json({
+          status: "error",
+          message: "User tidak ditemukan",
         });
+      }
 
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        return res.status(200).json({
-            status: "success",
-            data: sanitizeUser(user),
-        });
+      res.status(200).json({
+        status: "success",
+        data: user,
+      });
     } catch (error) {
-        console.error("Get user profile error:", error);
-        return res.status(500).json({ error: "Failed to fetch user profile" });
+      res.status(500).json({
+        status: "error",
+        message: "Gagal ambil profile",
+        error: error.message,
+      });
     }
-};
+  }
 
-export const updateUserProfile = async (req, res) => {
+  // ✏️ UPDATE PROFILE (hanya diri sendiri)
+  async update(req, res) {
     try {
-        if (!req.user?.id) {
-            return res.status(401).json({ error: "Not authorized" });
-        }
+      const { name, email, password } = req.body;
 
-        const { firstName, lastName, phone, password, newPassword } = req.body;
+      const dataToUpdate = {};
 
-        const existingUser = await prisma.user.findUnique({
-            where: { id: req.user.id },
+      if (name !== undefined) dataToUpdate.name = name;
+      if (email !== undefined) dataToUpdate.email = email;
+
+      // update password jika ada
+      if (password) {
+        const salt = await bcrypt.genSalt(10);
+        dataToUpdate.password = await bcrypt.hash(password, salt);
+      }
+
+      if (Object.keys(dataToUpdate).length === 0) {
+        return res.status(400).json({
+          status: "error",
+          message: "Tidak ada data yang diupdate",
         });
+      }
 
-        if (!existingUser) {
-            return res.status(404).json({ error: "User not found" });
-        }
+      const user = await prisma.user.update({
+        where: { id: req.user.id },
+        data: dataToUpdate,
+      });
 
-        const dataToUpdate = {};
-
-        if (firstName !== undefined || lastName !== undefined) {
-            const currentNameParts = splitName(existingUser.name || "");
-
-            // PERBAIKAN ESLINT: Diubah menjadi positif (=== undefined)
-            const nextFirstName =
-                firstName === undefined ? currentNameParts.firstName : String(firstName).trim();
-            const nextLastName =
-                lastName === undefined ? currentNameParts.lastName : String(lastName).trim();
-
-            const fullName = buildNameFromParts(nextFirstName, nextLastName);
-
-            if (!fullName) {
-                return res.status(400).json({
-                    error: "firstName or lastName must produce a valid name",
-                });
-            }
-
-            dataToUpdate.name = fullName;
-        }
-
-        if (phone !== undefined) {
-            const normalizedPhone = String(phone).trim();
-            dataToUpdate.phone = normalizedPhone || null;
-        }
-
-        const passwordCandidate = newPassword ?? password;
-
-        if (passwordCandidate !== undefined) {
-            const normalizedPassword = String(passwordCandidate);
-
-            if (!normalizedPassword.trim()) {
-                return res.status(400).json({
-                    error: "Password cannot be empty",
-                });
-            }
-
-            const salt = await bcrypt.genSalt(10);
-            dataToUpdate.password = await bcrypt.hash(normalizedPassword, salt);
-        }
-
-        if (Object.keys(dataToUpdate).length === 0) {
-            return res.status(400).json({
-                error: "No valid profile fields provided",
-            });
-        }
-
-        const updatedUser = await prisma.user.update({
-            where: { id: req.user.id },
-            data: dataToUpdate,
-        });
-
-        return res.status(200).json({
-            status: "success",
-            data: sanitizeUser(updatedUser),
-        });
+      res.status(200).json({
+        status: "success",
+        message: "Berhasil update profile",
+        data: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+      });
     } catch (error) {
-        console.error("Update user profile error:", error);
-        return res.status(500).json({ error: "Failed to update user profile" });
+      res.status(500).json({
+        status: "error",
+        message: "Gagal update profile",
+        error: error.message,
+      });
     }
-};
+  }
 
-export const deleteUserProfile = async (req, res) => {
+  // 🗑️ DELETE ACCOUNT (hapus akun sendiri)
+  async destroy(req, res) {
     try {
-        if (!req.user?.id) {
-            return res.status(401).json({ error: "Not authorized" });
-        }
+      await prisma.user.delete({
+        where: { id: req.user.id },
+      });
 
-        const existingUser = await prisma.user.findUnique({
-            where: { id: req.user.id },
-        });
-
-        if (!existingUser) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        await prisma.user.delete({
-            where: { id: req.user.id },
-        });
-
-        return res.status(200).json({
-            status: "success",
-            message: "User profile deleted successfully",
-        });
+      res.status(200).json({
+        status: "success",
+        message: "Akun berhasil dihapus",
+      });
     } catch (error) {
-        console.error("Delete user profile error:", error);
-        return res.status(500).json({ error: "Failed to delete user profile" });
+      res.status(500).json({
+        status: "error",
+        message: "Gagal hapus akun",
+        error: error.message,
+      });
     }
-};
+  }
+}
+
+export default new UsersController();

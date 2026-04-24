@@ -1,15 +1,21 @@
 import express from "express";
-import {
-    deleteUserProfile,
-    getUserProfile,
-    updateUserProfile,
-} from "../controllers/userController.js";
+import UsersController from "../controllers/UserController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
+import validate from "../middlewares/validate.js";
+import { updateUserSchema } from "../utils/userValidator.js";
 
 const router = express.Router();
 
-router.get("/profile", authMiddleware, getUserProfile);
-router.put("/profile", authMiddleware, updateUserProfile);
-router.delete("/profile", authMiddleware, deleteUserProfile);
+// semua endpoint butuh login
+router.get("/profile", authMiddleware, UsersController.profile);
+
+router.put(
+  "/profile",
+  authMiddleware,
+  validate(updateUserSchema),
+  UsersController.update
+);
+
+router.delete("/profile", authMiddleware, UsersController.destroy);
 
 export default router;
