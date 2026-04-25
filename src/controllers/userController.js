@@ -28,10 +28,10 @@ class UsersController {
         data: user,
       });
     } catch (error) {
+      console.error("profile error:", error);
       res.status(500).json({
         status: "error",
         message: "Gagal ambil profile",
-        error: error.message,
       });
     }
   }
@@ -74,10 +74,10 @@ class UsersController {
         },
       });
     } catch (error) {
+      console.error("update error:", error);
       res.status(500).json({
         status: "error",
         message: "Gagal update profile",
-        error: error.message,
       });
     }
   }
@@ -94,10 +94,10 @@ class UsersController {
         message: "Akun berhasil dihapus",
       });
     } catch (error) {
+      console.error("destroy error:", error);
       res.status(500).json({
         status: "error",
         message: "Gagal hapus akun",
-        error: error.message,
       });
     }
   }

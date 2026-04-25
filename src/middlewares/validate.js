@@ -1,6 +1,8 @@
 const validate = (schema, property = "body") => {
   return (req, res, next) => {
-    const { error } = schema.validate(req[property]);
+    const { error, value } = schema.validate(req[property], {
+      stripUnknown: true,
+    });
 
     if (error) {
       return res.status(400).json({
@@ -9,6 +11,7 @@ const validate = (schema, property = "body") => {
       });
     }
 
+    req[property] = value;
     next();
   };
 };
