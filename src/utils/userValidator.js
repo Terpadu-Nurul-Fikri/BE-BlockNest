@@ -10,4 +10,8 @@ export const updateUserSchema = Joi.object({
   email: Joi.string().email().messages({
     "string.email": "Format email tidak valid",
   }),
+
+  password: Joi.string().min(6).messages({
+    "string.min": "Password minimal 6 karakter",
+  }),
 });
