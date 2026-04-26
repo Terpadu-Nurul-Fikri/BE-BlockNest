@@ -10,6 +10,7 @@ import webhookRouters from "./routes/webhookRoutes.js";
 import reviewRouters from "./routes/reviewRoutes.js";
 import usersRouters from "./routes/usersRoutes.js";
 import { errorHandler, notFound } from "./utils/errorHandling.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 // import database connection functions
 import { connectDB, disconnectDB } from "./config/index.js";
@@ -44,6 +45,7 @@ app.use("/api/auth", authRouters);
 app.use("/api/webhooks", webhookRouters);
 app.use("/api/reviews", reviewRouters);
 app.use("/api/users", usersRouters);
+app.use("/api/admin", adminRoutes);
 
 app.get("/health", (_req, res) => {
   res.status(200).json({

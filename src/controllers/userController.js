@@ -39,14 +39,14 @@ class UsersController {
   // ✏️ UPDATE PROFILE (hanya diri sendiri)
   async update(req, res) {
     try {
-      const { name, email, password } = req.body;
+      const { name, email, phone, password } = req.body;
 
       const dataToUpdate = {};
 
       if (name !== undefined) dataToUpdate.name = name;
       if (email !== undefined) dataToUpdate.email = email;
+      if (phone !== undefined) dataToUpdate.phone = phone;
 
-      // update password jika ada
       if (password) {
         const salt = await bcrypt.genSalt(10);
         dataToUpdate.password = await bcrypt.hash(password, salt);
@@ -71,6 +71,7 @@ class UsersController {
           id: user.id,
           name: user.name,
           email: user.email,
+          phone: user.phone,
         },
       });
     } catch (error) {
