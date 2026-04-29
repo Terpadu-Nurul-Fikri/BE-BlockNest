@@ -7,6 +7,8 @@ export const updateUserSchema = Joi.object({
     "any.invalid": "Nama tidak boleh kosong",
   }),
 
+  phone: Joi.string().min(10).max(15),
+
   email: Joi.string().email().messages({
     "string.email": "Format email tidak valid",
   }),
