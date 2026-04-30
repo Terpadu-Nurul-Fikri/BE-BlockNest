@@ -1,5 +1,10 @@
 import "dotenv/config";
 import express from "express";
+import path from "path";
+
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // import routes
 import authRouters from "./routes/authRoutes.js";
@@ -30,7 +35,7 @@ app.use(
     verify: (req, _res, buf) => {
       req.rawBody = buf.toString("utf8");
     },
-  })
+  }),
 );
 app.use(express.urlencoded({ extended: true }));
 
@@ -39,13 +44,14 @@ await connectDB();
 
 // routes
 app.use("/api", productRouters);
-app.use("/api/category", categoryRouters)
+app.use("/api/category", categoryRouters);
 app.use("/api/banners", bannerRouters);
 app.use("/api/auth", authRouters);
 app.use("/api/webhooks", webhookRouters);
 app.use("/api/reviews", reviewRouters);
 app.use("/api/users", usersRouters);
 app.use("/api/admin", adminRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.get("/health", (_req, res) => {
   res.status(200).json({
