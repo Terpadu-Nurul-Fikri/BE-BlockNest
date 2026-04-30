@@ -43,11 +43,17 @@ enum BannerType {
 
 // 1. Model Users
 model User {
+  firstName    String     @map("first_name") @db.VarChar(100)
+  lastName     String?    @map("last_name") @db.VarChar(100)
   id           String     @id @default(uuid()) @db.Uuid
   email        String     @unique @db.VarChar(255)
   password String     @map("password") @db.VarChar(255)
+<<<<<<< HEAD
   name    String     @map("name") @db.VarChar(100)
    photoUrl     String?    @map("photo_url") @db.Text
+=======
+  userName    String     @map("username") @db.VarChar(100)
+>>>>>>> 3d80f868cb3d13dd0ed8722056bd3b36303fc8cc
   phone        String?    @db.VarChar(20)
   role         UserRole  @default(CUSTOMER)
   createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
