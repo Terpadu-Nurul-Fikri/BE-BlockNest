@@ -11,7 +11,7 @@ router.get(
   "/users",
   authMiddleware,
   authorizeRoles("ADMIN"),
-  AdminController.getAllUsers,
+  AdminController.getAllUsers.bind(AdminController),
 );
 
 export default router;

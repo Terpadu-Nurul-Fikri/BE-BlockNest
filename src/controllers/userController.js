@@ -2,14 +2,16 @@ import { prisma } from "../config/index.js";
 import bcrypt from "bcryptjs";
 
 class UsersController {
-  // 🔍 GET PROFILE (user login)
   async profile(req, res) {
     try {
       const user = await prisma.user.findUnique({
         where: { id: req.user.id },
         select: {
           id: true,
-          name: true,
+          firstName: true,
+          lastName: true,
+          userName: true,
+          phone: true,
           email: true,
           role: true,
           createdAt: true,
@@ -39,14 +41,18 @@ class UsersController {
   // ✏️ UPDATE PROFILE (hanya diri sendiri)
   async update(req, res) {
     try {
-      const { name, email, phone, password } = req.body;
+      const { firstName, name, lastName, username, phone, email, password } = req.body;
 
       const dataToUpdate = {};
+      const resolvedFirstName = firstName === undefined ? name : firstName;
 
-      if (name !== undefined) dataToUpdate.name = name;
+      if (resolvedFirstName !== undefined) dataToUpdate.firstName = resolvedFirstName;
+      if (lastName !== undefined) dataToUpdate.lastName = lastName || null;
+      if (username !== undefined) dataToUpdate.username = username;
+      if (phone !== undefined) dataToUpdate.phone = phone || null;
       if (email !== undefined) dataToUpdate.email = email;
-      if (phone !== undefined) dataToUpdate.phone = phone;
 
+      // update password jika ada
       if (password) {
         const salt = await bcrypt.genSalt(10);
         dataToUpdate.password = await bcrypt.hash(password, salt);
@@ -69,7 +75,9 @@ class UsersController {
         message: "Berhasil update profile",
         data: {
           id: user.id,
-          name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
           email: user.email,
           phone: user.phone,
         },
