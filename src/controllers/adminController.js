@@ -6,7 +6,9 @@ class AdminController {
       const users = await prisma.user.findMany({
         select: {
           id: true,
-          name: true,
+          userName: true,
+          firstName: true,
+          lastName: true,
           email: true,
           phone: true,
           role: true,
