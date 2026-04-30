@@ -43,17 +43,19 @@ enum BannerType {
 
 // 1. Model Users
 model User {
-  firstName    String     @map("first_name") @db.VarChar(100)
-  lastName     String?    @map("last_name") @db.VarChar(100)
-  id           String     @id @default(uuid()) @db.Uuid
-  email        String     @unique @db.VarChar(255)
-  password String     @map("password") @db.VarChar(255)
-  photoUrl     String?    @map("photo_url") @db.Text
-  userName    String     @map("username") @db.VarChar(100)
-  phone        String?    @db.VarChar(20)
-  role         UserRole  @default(CUSTOMER)
-  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  firstName String @map("first_name") @db.VarChar(100)
+  lastName  String? @map("last_name") @db.VarChar(100)
+  id        String  @id @default(uuid()) @db.Uuid
+  email     String  @unique @db.VarChar(255)
+  password  String  @map("password") @db.VarChar(255)
+
+  userName  String  @map("username") @db.VarChar(100)
+  photoUrl  String? @map("photo_url") @db.Text   // tambahan kamu
+
+  phone     String? @db.VarChar(20)
+  role      UserRole @default(CUSTOMER)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   // Relasi
   cartItems CartItem[]
