@@ -47,6 +47,7 @@ model User {
   email        String     @unique @db.VarChar(255)
   password String     @map("password") @db.VarChar(255)
   name    String     @map("name") @db.VarChar(100)
+   photoUrl     String?    @map("photo_url") @db.Text
   phone        String?    @db.VarChar(20)
   role         UserRole  @default(CUSTOMER)
   createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
