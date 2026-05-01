@@ -10,12 +10,12 @@ import {
 } from "../controllers/productController.js";
 import {
     authorizeRoles,
-    redirectGuestToLogin,
+    authMiddleware
 } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-const adminOnly = [redirectGuestToLogin, authorizeRoles("ADMIN")];
+const adminOnly = [authMiddleware, authorizeRoles("ADMIN")];
 
 // Endpoint admin product CRUD
 router.get("/admin/products", ...adminOnly, getAllProductsAdmin);
@@ -27,7 +27,7 @@ router.delete("/admin/products/:id", ...adminOnly, deleteProduct);
 // Endpoint: GET /product/category/:slug
 router.get(
     "/category/:slug",
-    redirectGuestToLogin,
+    authMiddleware,
     authorizeRoles("CUSTOMER", "ADMIN"),
     getProductsByCategory
 );

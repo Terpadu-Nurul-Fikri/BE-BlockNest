@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "debug": "node --watch src/debug.js"
+    "debug": "node --watch src/debug.js",
+    "seed": "node prisma/seed.js"
   },
   "repository": {
     "type": "git",
