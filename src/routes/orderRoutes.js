@@ -1,17 +1,33 @@
-const express = require("express");
+import express from "express";
+import {
+  createOrder,
+  getUserOrders,
+  getOrderById,
+  cancelOrder,
+  updateOrderStatus,
+  approveOrder,
+  updateOrder,
+  deleteOrder,
+  getAllOrders,
+} from "../controllers/orderController.js";
+import {
+  redirectGuestToLogin,
+  authorizeRoles,
+} from "../middlewares/authMiddleware.js";
+
 const router = express.Router();
-const orderController = require("../controllers/orderController");
-const { authMiddleware } = require("../middleware/authMiddleware");
-const { adminOnly } = require("../middleware/roleMiddleware");
 
-// User routes (authentication required)
-router.post("/", authMiddleware, orderController.createOrder);
-router.get("/", authMiddleware, orderController.getUserOrders);
-router.get("/:id", authMiddleware, orderController.getOrderById);
-router.patch("/:id/cancel", authMiddleware, orderController.cancelOrder);
+const customerOrAdmin = [redirectGuestToLogin, authorizeRoles("CUSTOMER", "ADMIN")];
+const adminOnly = [redirectGuestToLogin, authorizeRoles("ADMIN")];
 
-// Admin routes
-router.get("/admin/all", authMiddleware, adminOnly, orderController.getAllOrders);
-router.patch("/admin/:id/status", authMiddleware, adminOnly, orderController.updateOrderStatus);
+router.post("/", ...customerOrAdmin, createOrder);
+router.get("/", ...customerOrAdmin, getUserOrders);
+router.get("/admin/all", ...adminOnly, getAllOrders);
+router.patch("/admin/:id/approve", ...adminOnly, approveOrder);
+router.patch("/admin/:id/status", ...adminOnly, updateOrderStatus);
+router.put("/admin/:id", ...adminOnly, updateOrder);
+router.delete("/admin/:id", ...adminOnly, deleteOrder);
+router.get("/:id", ...customerOrAdmin, getOrderById);
+router.patch("/:id/cancel", ...customerOrAdmin, cancelOrder);
 
-module.exports = router;
+export default router;

@@ -1,12 +1,10 @@
-import crypto from "node:crypto";
 import { prisma } from "../config/index.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const hashPassword = (password) => {
-  const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
-  return `${salt}:${hash}`;
+const getFrontendUrl = () => {
+  const configured = process.env.FRONTEND_URL || "http://localhost:5173";
+  return configured.split(",")[0].trim().replace(/\/$/, "");
 };
 
 const register = async (req, res) => {
@@ -20,71 +18,250 @@ const register = async (req, res) => {
       });
     }
 
-    if (!EMAIL_REGEX.test(email)) {
+    const userExists = await prisma.user.findUnique({ where: { email } });
+    if (userExists) {
       return res.status(400).json({
         success: false,
-        message: "Format email tidak valid",
+        message: "User dengan email ini sudah ada",
       });
     }
 
-    if (password.length < 8) {
-      return res.status(400).json({
-        success: false,
-        message: "Password minimal 8 karakter",
-      });
-    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    const existing = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-      select: { id: true },
-    });
-
-    if (existing) {
-      return res.status(409).json({
-        success: false,
-        message: "Email sudah terdaftar",
-      });
-    }
-
-    const createdUser = await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
-        email: email.toLowerCase(),
-        passwordHash: hashPassword(password),
-        firstName: firstName.trim(),
-        lastName: lastName?.trim() || null,
-        phone: phone?.trim() || null,
-        role: "customer",
-      },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        phone: true,
-        role: true,
-        createdAt: true,
+        name: `${firstName} ${lastName || ""}`.trim(),
+        email,
+        password: hashedPassword,
+        phone,
       },
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
-      message: "Register berhasil",
-      data: createdUser,
+      data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
     });
   } catch (error) {
-    console.error("Register error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan pada server",
-    });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
 const login = async (req, res) => {
-  return res.status(501).json({
-    success: false,
-    message: "Fitur login belum diimplementasikan",
-  });
+  try {
+    const { email, password } = req.body;
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Email atau password salah" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: "Email atau password salah" });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRE || "7d" }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Login berhasil",
+      token,
+      data: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        phone: user.phone,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
 };
 
-export { register, login };
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email wajib diisi" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: "Jika email terdaftar, link reset password akan dikirim",
+      });
+    }
+
+    const resetToken = jwt.sign(
+      {
+        id: user.id,
+        purpose: "password-reset",
+        passwordHash: user.password,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.PASSWORD_RESET_EXPIRE || "15m" }
+    );
+    const resetUrl = `${getFrontendUrl()}/reset-password?token=${resetToken}`;
+
+    return res.status(200).json({
+      success: true,
+      message: "Jika email terdaftar, link reset password akan dikirim",
+      ...(process.env.NODE_ENV !== "production" ? { resetToken, resetUrl } : {}),
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ success: false, message: "Token dan password wajib diisi" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: "Password minimal 6 karakter" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.purpose !== "password-reset") {
+      return res.status(400).json({ success: false, message: "Token reset password tidak valid" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+    if (!user || user.password !== decoded.passwordHash) {
+      return res.status(400).json({ success: false, message: "Token reset password tidak valid atau sudah dipakai" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Password berhasil direset. Silakan login dengan password baru",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error.message);
+    return res.status(400).json({ success: false, message: "Token reset password tidak valid atau expired" });
+  }
+};
+
+const getProfile = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User tidak ditemukan" });
+    }
+
+    // Split name into firstName/lastName for FE compatibility
+    const [firstName, ...rest] = (user.name || "").split(" ");
+    const lastName = rest.join(" ") || undefined;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        ...user,
+        firstName,
+        lastName,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+const updateProfile = async (req, res) => {
+  try {
+    const { firstName, lastName, phone, currentPassword, newPassword } = req.body;
+
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User tidak ditemukan" });
+    }
+
+    const updateData = {};
+
+    if (firstName) {
+      updateData.name = `${firstName} ${lastName || ""}`.trim();
+    }
+    if (phone !== undefined) {
+      updateData.phone = phone;
+    }
+
+    // Ganti password jika diminta
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ success: false, message: "Password lama wajib diisi" });
+      }
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ success: false, message: "Password lama salah" });
+      }
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(newPassword, salt);
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: req.user.id },
+      data: updateData,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        updatedAt: true,
+      },
+    });
+
+    const [fn, ...rest] = (updated.name || "").split(" ");
+    const ln = rest.join(" ") || undefined;
+
+    res.status(200).json({
+      success: true,
+      message: "Profil berhasil diperbarui",
+      data: { ...updated, firstName: fn, lastName: ln },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export { register, login, forgotPassword, resetPassword, getProfile, updateProfile };

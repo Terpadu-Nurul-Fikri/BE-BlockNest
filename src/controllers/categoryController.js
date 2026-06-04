@@ -1,6 +1,187 @@
 // src/controllers/categoryController.js
 import { prisma } from "../config/index.js"; // Pastikan pakai .js
 
+export const createCategory = async (req, res) => {
+    try {
+        const {
+            slug,
+            label,
+            headline,
+            description,
+            seoDescription,
+            heroImage,
+            heroAlt,
+            ogImage,
+        } = req.body;
+
+        if (!slug || !label) {
+            return res.status(400).json({
+                success: false,
+                message: "Field wajib: slug dan label",
+            });
+        }
+
+        const category = await prisma.category.create({
+            data: {
+                slug,
+                label,
+                headline,
+                description,
+                seoDescription,
+                heroImage,
+                heroAlt,
+                ogImage,
+            },
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Category berhasil dibuat",
+            data: category,
+        });
+    } catch (error) {
+        console.error("Error creating category:", error);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+export const getAllCategoriesAdmin = async (_req, res) => {
+    try {
+        const categories = await prisma.category.findMany({
+            orderBy: { createdAt: "desc" },
+            include: {
+                _count: {
+                    select: {
+                        products: true,
+                    },
+                },
+            },
+        });
+
+        return res.json({
+            success: true,
+            data: categories,
+        });
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+export const getCategoryByIdAdmin = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const category = await prisma.category.findUnique({
+            where: { id },
+            include: {
+                products: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        stockQuantity: true,
+                        price: true,
+                    },
+                },
+            },
+        });
+
+        if (!category) {
+            return res.status(404).json({ success: false, message: "Category not found" });
+        }
+
+        return res.json({
+            success: true,
+            data: category,
+        });
+    } catch (error) {
+        console.error("Error fetching category detail:", error);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+export const updateCategory = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const existingCategory = await prisma.category.findUnique({ where: { id } });
+        if (!existingCategory) {
+            return res.status(404).json({ success: false, message: "Category not found" });
+        }
+
+        const {
+            slug,
+            label,
+            headline,
+            description,
+            seoDescription,
+            heroImage,
+            heroAlt,
+            ogImage,
+        } = req.body;
+
+        const category = await prisma.category.update({
+            where: { id },
+            data: {
+                slug,
+                label,
+                headline,
+                description,
+                seoDescription,
+                heroImage,
+                heroAlt,
+                ogImage,
+            },
+        });
+
+        return res.json({
+            success: true,
+            message: "Category berhasil diupdate",
+            data: category,
+        });
+    } catch (error) {
+        console.error("Error updating category:", error);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+export const deleteCategory = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const existingCategory = await prisma.category.findUnique({
+            where: { id },
+            include: {
+                _count: {
+                    select: { products: true },
+                },
+            },
+        });
+
+        if (!existingCategory) {
+            return res.status(404).json({ success: false, message: "Category not found" });
+        }
+
+        if (existingCategory._count.products > 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Category tidak bisa dihapus karena masih memiliki produk",
+            });
+        }
+
+        await prisma.category.delete({ where: { id } });
+
+        return res.json({
+            success: true,
+            message: "Category berhasil dihapus",
+        });
+    } catch (error) {
+        console.error("Error deleting category:", error);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
 export const getCategoryData = async (req, res) => {
     try {
         const { slug } = req.params;
