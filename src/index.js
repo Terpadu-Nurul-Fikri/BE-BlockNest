@@ -2,8 +2,9 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// import routes
 import authRouters from "./routes/authRoutes.js";
 import productRouters from "./routes/productRoutes.js";
 import categoryRouters from "./routes/categoryRoutes.js";
@@ -12,18 +13,23 @@ import webhookRouters from "./routes/webhookRoutes.js";
 import reviewRouters from "./routes/reviewRoutes.js";
 import orderRouters from "./routes/orderRoutes.js";
 import cartRouters from "./routes/cartRoutes.js";
-
-// import database connection functions
+import usersRouters from "./routes/usersRoutes.js";
+import adminRouters from "./routes/adminRoutes.js";
 import { connectDB, disconnectDB } from "./config/index.js";
+import { errorHandler, notFound } from "./utils/errorHandling.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = Number(process.env.PORT) || 3000;
 const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173,http://localhost:5174")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-// middleware
+app.set("trust proxy", 1);
+
 app.use(
   cors({
     origin(origin, callback) {
@@ -38,7 +44,6 @@ app.use(
 );
 
 app.use(cookieParser());
-
 app.use(
   express.json({
     verify: (req, _res, buf) => {
@@ -46,13 +51,10 @@ app.use(
     },
   })
 );
-
 app.use(express.urlencoded({ extended: true }));
 
-// connect database
 await connectDB();
 
-// routes
 app.use("/api", productRouters);
 app.use("/api/category", categoryRouters);
 app.use("/api/banners", bannerRouters);
@@ -61,8 +63,10 @@ app.use("/api/webhooks", webhookRouters);
 app.use("/api/reviews", reviewRouters);
 app.use("/api/orders", orderRouters);
 app.use("/api/cart", cartRouters);
+app.use("/api/users", usersRouters);
+app.use("/api/admin", adminRouters);
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-// health check
 app.get("/health", (_req, res) => {
   res.status(200).json({
     success: true,
@@ -72,32 +76,29 @@ app.get("/health", (_req, res) => {
   });
 });
 
-// root endpoint
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.json({
     message: "BlockNest API running",
     endpoints: {
       products: "/api",
       register: "/api/auth/register",
       login: "/api/auth/login",
+      forgotPassword: "/api/auth/forgot-password",
+      orders: "/api/orders",
+      cart: "/api/cart",
+      users: "/api/users",
+      admin: "/api/admin",
     },
   });
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Endpoint tidak ditemukan: ${req.method} ${req.originalUrl}`,
-  });
-});
+app.use(notFound);
+app.use(errorHandler);
 
-// start server
 const server = app.listen(port, () => {
   console.log(`Server berjalan di http://localhost:${port}`);
 });
 
-// Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
   console.error("Unhandled Rejection:", err);
   server.close(async () => {
@@ -114,7 +115,6 @@ process.on("uncaughtException", (err) => {
   });
 });
 
-// Graceful shutdown
 process.on("SIGINT", async () => {
   console.log("SIGINT received. Shutting down gracefully...");
   await disconnectDB();

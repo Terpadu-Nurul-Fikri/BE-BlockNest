@@ -7,9 +7,29 @@ const getFrontendUrl = () => {
   return configured.split(",")[0].trim().replace(/\/$/, "");
 };
 
+const buildUserName = (email, firstName) => {
+  return (firstName || email.split("@")[0]).trim().toLowerCase().replace(/\s+/g, ".");
+};
+
+const mapAuthUser = (user) => {
+  const name = user.name || `${user.firstName || ""} ${user.lastName || ""}`.trim();
+
+  return {
+    id: user.id,
+    email: user.email,
+    name,
+    firstName: user.firstName || name.split(" ")[0] || "",
+    lastName: user.lastName || name.split(" ").slice(1).join(" ") || undefined,
+    phone: user.phone,
+    role: user.role,
+    userName: user.userName,
+    photoUrl: user.photoUrl,
+  };
+};
+
 const register = async (req, res) => {
   try {
-    const { email, password, firstName, lastName, phone } = req.body;
+    const { email, password, firstName, lastName, phone, userName } = req.body;
 
     if (!email || !password || !firstName) {
       return res.status(400).json({
@@ -28,10 +48,14 @@ const register = async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    const name = `${firstName} ${lastName || ""}`.trim();
 
     const user = await prisma.user.create({
       data: {
-        name: `${firstName} ${lastName || ""}`.trim(),
+        name,
+        firstName,
+        lastName: lastName || null,
+        userName: userName || buildUserName(email, firstName),
         email,
         password: hashedPassword,
         phone,
@@ -40,14 +64,10 @@ const register = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      data: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
+      data: mapAuthUser(user),
     });
   } catch (error) {
-    console.error(error);
+    console.error("Register error:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
@@ -55,6 +75,10 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "Email dan password wajib diisi" });
+    }
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
@@ -69,23 +93,17 @@ const login = async (req, res) => {
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE || "7d" }
+      { expiresIn: process.env.JWT_EXPIRE || process.env.JWT_EXPIRES_IN || "7d" }
     );
 
     res.status(200).json({
       success: true,
       message: "Login berhasil",
       token,
-      data: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        phone: user.phone,
-      },
+      data: mapAuthUser(user),
     });
   } catch (error) {
-    console.error(error);
+    console.error("Login error:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
@@ -99,7 +117,6 @@ const forgotPassword = async (req, res) => {
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
-
     if (!user) {
       return res.status(200).json({
         success: true,
@@ -176,9 +193,13 @@ const getProfile = async (req, res) => {
       select: {
         id: true,
         name: true,
+        firstName: true,
+        lastName: true,
+        userName: true,
         email: true,
         phone: true,
         role: true,
+        photoUrl: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -188,20 +209,12 @@ const getProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: "User tidak ditemukan" });
     }
 
-    // Split name into firstName/lastName for FE compatibility
-    const [firstName, ...rest] = (user.name || "").split(" ");
-    const lastName = rest.join(" ") || undefined;
-
     res.status(200).json({
       success: true,
-      data: {
-        ...user,
-        firstName,
-        lastName,
-      },
+      data: mapAuthUser(user),
     });
   } catch (error) {
-    console.error(error);
+    console.error("Get profile error:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
@@ -218,13 +231,14 @@ const updateProfile = async (req, res) => {
     const updateData = {};
 
     if (firstName) {
+      updateData.firstName = firstName;
+      updateData.lastName = lastName || null;
       updateData.name = `${firstName} ${lastName || ""}`.trim();
     }
     if (phone !== undefined) {
       updateData.phone = phone;
     }
 
-    // Ganti password jika diminta
     if (newPassword) {
       if (!currentPassword) {
         return res.status(400).json({ success: false, message: "Password lama wajib diisi" });
@@ -243,23 +257,24 @@ const updateProfile = async (req, res) => {
       select: {
         id: true,
         name: true,
+        firstName: true,
+        lastName: true,
+        userName: true,
         email: true,
         phone: true,
         role: true,
+        photoUrl: true,
         updatedAt: true,
       },
     });
 
-    const [fn, ...rest] = (updated.name || "").split(" ");
-    const ln = rest.join(" ") || undefined;
-
     res.status(200).json({
       success: true,
       message: "Profil berhasil diperbarui",
-      data: { ...updated, firstName: fn, lastName: ln },
+      data: mapAuthUser(updated),
     });
   } catch (error) {
-    console.error(error);
+    console.error("Update profile error:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };

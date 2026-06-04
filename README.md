@@ -62,6 +62,22 @@ Run the application in development mode:
 npm run dev
 ```
 
+### Daily Workflow
+
+Use this quick checklist at the start of each work session to stay synced:
+
+```bash
+# Update main and your feature branch (if any)
+git checkout main
+git pull origin main
+
+# If working on a feature branch, rebase or pull latest
+git checkout feature/your-feature-name
+git pull origin feature/your-feature-name
+# or
+git rebase main
+```
+
 ---
 
 ## Database Management
@@ -157,6 +173,21 @@ git push origin feature/your-feature-name
 ```
 git branch -d feature/your-feature-name
 git push origin --delete feature/your-feature-name
+```
+
+### Pull Latest Changes
+
+Before starting new work, pull the latest changes from the remote branch you are working on:
+
+```bash
+git checkout main
+git pull origin main
+```
+
+If you are already on a feature branch, you can pull updates for that branch directly:
+
+```bash
+git pull origin feature/your-feature-name
 ```
 
 ---

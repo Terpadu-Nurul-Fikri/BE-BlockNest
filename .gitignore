@@ -15,3 +15,5 @@ coverage
 .env.production.local
 
 /src/generated/prisma
+
+uploads
