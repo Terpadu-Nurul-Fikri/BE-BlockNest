@@ -15,13 +15,13 @@ cp .env.example .env
 # DATABASE_URL="postgresql://postgres:postgres@localhost:5432/blocknest_db?schema=public"
 
 # 4. Generate Prisma Client
-npm run prisma:generate
+npm run db:generate
 
 # 5. Run migrations
-npm run prisma:migrate
+npm run db:migrate
 
 # 6. Seed database (optional)
-npm run prisma:seed
+npm run db:seed
 
 # 7. Start development server
 npm run dev
@@ -54,33 +54,33 @@ Dependencies yang akan terinstall:
 #### Option A: Menggunakan PostgreSQL lokal
 
 **Install PostgreSQL:**
-```bash
+npm run db:generate
 # Windows (chocolatey)
 choco install postgresql
-
+npm run db:migrate
 # Mac (homebrew)
 brew install postgresql@15
-brew services start postgresql@15
+npm run db:seed
 
 # Linux (Ubuntu/Debian)
 sudo apt install postgresql postgresql-contrib
 sudo systemctl start postgresql
-```
+npm run db:studio
 
 **Create database:**
 ```bash
-# Login ke PostgreSQL
+npm run db:generate
 psql -U postgres
 
 # Create database
 CREATE DATABASE blocknest_db;
-
+npm run db:migrate
 # Exit
 \q
 ```
 
 #### Option B: Menggunakan Docker
-
+npm run db:seed
 **docker-compose.yml** (di root project):
 ```yaml
 version: '3.8'
@@ -88,40 +88,40 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: blocknest_postgres
-    environment:
+npm run db:migrate
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: blocknest_db
-    ports:
+npm run db:migrate
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-volumes:
+npm run db:migrate reset
   postgres_data:
 ```
-
+npm run db:migrate
 **Start Docker:**
 ```bash
-docker-compose up -d
+npm run db:seed
 ```
 
 ### 3. Configure Environment Variables
 
-**Copy .env.example:**
+npm run db:generate
 ```bash
 cp .env.example .env
 ```
-
+npm run db:migrate reset
 **Edit .env:**
 ```env
-# Application
+npm run db:studio
 NODE_ENV=development
 PORT=4000
-
-# Database (adjust sesuai setup kamu)
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/blocknest_db?schema=public"
-
+npm run db:generate      # Generate Prisma Client
+npm run db:migrate       # Run migrations
+npm run db:studio        # Open database GUI
+npm run db:seed          # Seed database
 # JWT
 JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
 JWT_EXPIRES_IN="7d"
@@ -149,16 +149,16 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 **Generate Prisma Client:**
 ```bash
-npm run prisma:generate
+npm run db:generate
 ```
 
 **Create database tables:**
 ```bash
-npm run prisma:migrate
+npm run db:migrate
 ```
 
 Command ini akan:
-- Membaca `src/prisma/schema.prisma`
+- Membaca `prisma/schema.prisma`
 - Membuat migration file
 - Apply migration ke database
 - Create tables: users, products, orders, dll.
@@ -166,7 +166,7 @@ Command ini akan:
 **Verify tables:**
 ```bash
 # Open Prisma Studio (database GUI)
-npm run prisma:studio
+npm run db:studio
 ```
 
 Browser akan open di http://localhost:5555
@@ -176,7 +176,7 @@ Browser akan open di http://localhost:5555
 Seed database dengan data sample:
 
 ```bash
-npm run prisma:seed
+npm run db:seed
 ```
 
 Data yang akan dibuat:
@@ -229,9 +229,9 @@ curl http://localhost:4000/api/products
 Setiap kali mengubah `schema.prisma`:
 
 ```bash
-# 1. Edit src/prisma/schema.prisma
+# 1. Edit prisma/schema.prisma
 # 2. Create migration
-npm run prisma:migrate
+npm run db:migrate
 
 # Prisma akan tanya nama migration
 # Example: "add_product_rating"
@@ -244,7 +244,7 @@ npm run prisma:migrate
 
 **Example: Tambah field `phone` di User:**
 
-1. Edit `src/prisma/schema.prisma`:
+1. Edit `prisma/schema.prisma`:
 ```prisma
 model User {
   id       String @id @default(uuid())
@@ -258,7 +258,7 @@ model User {
 
 2. Create migration:
 ```bash
-npm run prisma:migrate
+npm run db:migrate
 # Name: "add_user_phone_field"
 ```
 
@@ -268,13 +268,13 @@ npm run prisma:migrate
 
 ```bash
 # Hapus semua data & migrations
-npm run prisma:migrate reset
+npm run db:migrate reset
 
 # Re-run migrations
-npm run prisma:migrate
+npm run db:migrate
 
 # Seed lagi
-npm run prisma:seed
+npm run db:seed
 ```
 
 **WARNING:** Command ini akan **DELETE ALL DATA**!
@@ -446,7 +446,7 @@ psql -U postgres -d blocknest_db
 ### Error: Prisma Client not generated
 
 ```bash
-npm run prisma:generate
+npm run db:generate
 ```
 
 ### Error: Module not found
@@ -463,10 +463,10 @@ npm install
 
 ```bash
 # Reset database (CAUTION: deletes data!)
-npm run prisma:migrate reset
+npm run db:migrate reset
 
 # Or manually drop tables via Prisma Studio
-npm run prisma:studio
+npm run db:studio
 ```
 
 ## 📚 Useful Commands
@@ -477,10 +477,10 @@ npm run dev              # Start with auto-reload
 npm start                # Start production
 
 # Prisma
-npm run prisma:generate  # Generate Prisma Client
-npm run prisma:migrate   # Run migrations
-npm run prisma:studio    # Open database GUI
-npm run prisma:seed      # Seed database
+npm run db:generate      # Generate Prisma Client
+npm run db:migrate       # Run migrations
+npm run db:studio        # Open database GUI
+npm run db:seed          # Seed database
 
 # Database
 psql -U postgres         # PostgreSQL CLI
