@@ -1,10 +1,18 @@
 // src/controllers/categoryController.js
 import { prisma } from "../config/index.js"; // Pastikan pakai .js
 
+const toSlug = (value = "") =>
+    value
+        .toString()
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
 export const createCategory = async (req, res) => {
     try {
         const {
-            slug,
+            slug: inputSlug,
             label,
             headline,
             description,
@@ -13,11 +21,18 @@ export const createCategory = async (req, res) => {
             heroAlt,
             ogImage,
         } = req.body;
+        const slug = inputSlug ? toSlug(inputSlug) : toSlug(label);
 
-        if (!slug || !label) {
+        if (!label) {
             return res.status(400).json({
                 success: false,
-                message: "Field wajib: slug dan label",
+                message: "Field wajib: label",
+            });
+        }
+        if (!slug) {
+            return res.status(400).json({
+                success: false,
+                message: "Slug tidak valid",
             });
         }
 
@@ -41,6 +56,9 @@ export const createCategory = async (req, res) => {
         });
     } catch (error) {
         console.error("Error creating category:", error);
+        if (error.code === "P2002") {
+            return res.status(400).json({ success: false, message: "Slug category sudah digunakan" });
+        }
         return res.status(500).json({ success: false, message: "Server error" });
     }
 };
@@ -111,7 +129,7 @@ export const updateCategory = async (req, res) => {
         }
 
         const {
-            slug,
+            slug: inputSlug,
             label,
             headline,
             description,
@@ -120,6 +138,14 @@ export const updateCategory = async (req, res) => {
             heroAlt,
             ogImage,
         } = req.body;
+        const slug = inputSlug !== undefined ? toSlug(inputSlug) : existingCategory.slug;
+
+        if (label !== undefined && !label) {
+            return res.status(400).json({ success: false, message: "Label tidak boleh kosong" });
+        }
+        if (!slug) {
+            return res.status(400).json({ success: false, message: "Slug tidak valid" });
+        }
 
         const category = await prisma.category.update({
             where: { id },
@@ -142,6 +168,9 @@ export const updateCategory = async (req, res) => {
         });
     } catch (error) {
         console.error("Error updating category:", error);
+        if (error.code === "P2002") {
+            return res.status(400).json({ success: false, message: "Slug category sudah digunakan" });
+        }
         return res.status(500).json({ success: false, message: "Server error" });
     }
 };

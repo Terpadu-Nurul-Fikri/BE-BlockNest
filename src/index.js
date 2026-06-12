@@ -55,8 +55,8 @@ app.use(express.urlencoded({ extended: true }));
 
 await connectDB();
 
-app.use("/api", productRouters);
 app.use("/api/category", categoryRouters);
+app.use("/api", productRouters);
 app.use("/api/banners", bannerRouters);
 app.use("/api/auth", authRouters);
 app.use("/api/webhooks", webhookRouters);
