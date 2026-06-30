@@ -13,15 +13,24 @@ const parseRating = (rating) => {
     return parsed;
 };
 
-const mapReview = (review) => ({
-    id: review.id,
-    rating: review.rating,
-    comment: review.comment,
-    createdAt: review.createdAt,
-    updatedAt: review.updatedAt,
-    user: review.user,
-    product: review.product,
-});
+const mapReview = (review) => {
+    let user = review.user;
+    if (user) {
+        user = {
+            ...user,
+            name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+        };
+    }
+    return {
+        id: review.id,
+        rating: review.rating,
+        comment: review.comment,
+        createdAt: review.createdAt,
+        updatedAt: review.updatedAt,
+        user,
+        product: review.product,
+    };
+};
 
 const sendServerError = (res, message, error) => {
     console.error(message, error);
@@ -68,7 +77,7 @@ export const createReview = async (req, res) => {
                 comment: comment || null,
             },
             include: {
-                user: { select: { id: true, name: true, email: true } },
+                user: { select: { id: true, firstName: true, lastName: true, email: true } },
                 product: { select: { id: true, name: true, slug: true } },
             },
         });
@@ -95,7 +104,7 @@ export const getAllReviewsAdmin = async (_req, res) => {
         const reviews = await prisma.review.findMany({
             orderBy: { createdAt: "desc" },
             include: {
-                user: { select: { id: true, name: true, email: true } },
+                user: { select: { id: true, firstName: true, lastName: true, email: true } },
                 product: { select: { id: true, name: true, slug: true } },
             },
         });
@@ -129,7 +138,7 @@ export const getReviewsByProduct = async (req, res) => {
             where: { productId },
             orderBy: { createdAt: "desc" },
             include: {
-                user: { select: { id: true, name: true } },
+                user: { select: { id: true, firstName: true, lastName: true } },
             },
         });
 
@@ -161,7 +170,7 @@ export const getReviewById = async (req, res) => {
         const review = await prisma.review.findUnique({
             where: { id },
             include: {
-                user: { select: { id: true, name: true, email: true } },
+                user: { select: { id: true, firstName: true, lastName: true, email: true } },
                 product: { select: { id: true, name: true, slug: true } },
             },
         });
@@ -231,7 +240,7 @@ export const updateReview = async (req, res) => {
             where: { id },
             data: payload,
             include: {
-                user: { select: { id: true, name: true, email: true } },
+                user: { select: { id: true, firstName: true, lastName: true, email: true } },
                 product: { select: { id: true, name: true, slug: true } },
             },
         });

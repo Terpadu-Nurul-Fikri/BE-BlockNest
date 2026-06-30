@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { prisma } from "../config/index.js";
 
-const mapGatewayStatus = (transactionStatus, fraudStatus) => {
+export const mapGatewayStatus = (transactionStatus, fraudStatus) => {
   if (["settlement", "capture"].includes(transactionStatus)) {
     if (transactionStatus === "capture" && fraudStatus && fraudStatus !== "accept") {
       return "PENDING";
@@ -16,7 +16,7 @@ const mapGatewayStatus = (transactionStatus, fraudStatus) => {
   return "PENDING";
 };
 
-const mapOrderStatus = (transactionStatus, paymentStatus) => {
+export const mapOrderStatus = (transactionStatus, paymentStatus) => {
   if (paymentStatus === "SUCCESS") {
     return "PAID";
   }
