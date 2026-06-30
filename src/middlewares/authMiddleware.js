@@ -107,3 +107,21 @@ export const authorizeRoles = (...allowedRoles) => {
     next();
   };
 };
+
+/**
+ * Middleware untuk mengambil user jika ada token, tetapi tidak memblokir guest.
+ */
+export const optionalAuthMiddleware = async (req, res, next) => {
+  try {
+    const token = getTokenFromRequest(req);
+    if (token) {
+      const user = await resolveUserFromToken(token);
+      if (user) {
+        req.user = user;
+      }
+    }
+  } catch (err) {
+    console.debug("Optional auth check failed:", err.message);
+  }
+  next();
+};

@@ -1,6 +1,6 @@
 # Backend Feature Updates
 
-Dokumen ini menjelaskan update yang sudah ditambahkan untuk admin CRUD, webhook payment, dan model review.
+Dokumen ini menjelaskan update yang sudah ditambahkan untuk admin CRUD, dummy payment/manual approval, dan model review.
 
 ## 1. Route Baru dan Proteksi Role
 
@@ -36,15 +36,31 @@ Semua endpoint admin category juga dilindungi middleware admin.
 - `PUT /api/banners/:id` admin only
 - `DELETE /api/banners/:id` admin only
 
-## 2. Payment Webhook
+## 2. Dummy Payment / Manual Approval
 
-Endpoint baru:
+Flow pembayaran utama backend ini adalah dummy manual payment:
+
+1. Customer membuat order lewat `POST /api/orders`.
+2. Order dibuat dengan status `PENDING`.
+3. Admin memverifikasi pembayaran di luar sistem, lalu approve lewat `PATCH /api/orders/admin/:id/approve`.
+4. Saat approve, backend mengubah order menjadi `PAID` dan membuat atau memperbarui record `payments` dummy:
+   - `paymentMethod: "dummy_manual"`
+   - `paymentStatus: "SUCCESS"`
+   - `amount` dari `order.totalAmount`
+   - `paidAt` diisi waktu approval
+
+Endpoint utama:
+
+- `POST /api/orders` untuk membuat order `PENDING`
+- `PATCH /api/orders/admin/:id/approve` untuk approval manual admin dan dummy payment `SUCCESS`
+
+Endpoint simulasi/legacy:
 
 - `POST /api/webhooks/payment`
 
-Controller webhook akan:
+Webhook payment masih tersedia agar route existing tidak putus, tetapi bukan jalur checkout utama dan bukan integrasi gateway production. Controller webhook akan:
 
-- validasi signature webhook jika env `PAYMENT_WEBHOOK_SECRET` di-set
+- validasi signature webhook jika env `PAYMENT_WEBHOOK_SECRET` di-set secara opsional
 - mapping status payment gateway ke `PaymentStatus` internal (`PENDING`, `SUCCESS`, `FAILED`)
 - update/create data pada tabel `payments`
 - sinkronkan status order (`PAID`, `PENDING`, `CANCELLED`)
@@ -62,11 +78,11 @@ Contoh payload webhook:
 }
 ```
 
-Jika menggunakan signature secret, kirim header:
+Jika ingin mensimulasikan signature secret, kirim header:
 
 - `x-webhook-signature: <hmac_sha256_hex>`
 
-Nilai signature dihitung dari raw request body dengan key `PAYMENT_WEBHOOK_SECRET`.
+Nilai signature dihitung dari raw request body dengan key `PAYMENT_WEBHOOK_SECRET`. Env ini opsional untuk webhook simulation dan tidak dibutuhkan untuk flow payment utama.
 
 ## 3. Review Model (Prisma)
 
@@ -96,7 +112,7 @@ Constraint:
 `src/index.js` diupdate agar:
 
 - register route webhook `app.use("/api/webhooks", webhookRouters)`
-- simpan raw body via `express.json({ verify })` untuk validasi signature webhook
+- simpan raw body via `express.json({ verify })` untuk validasi signature webhook opsional
 - expose endpoint health check `GET /health`
 - tambah fallback 404 JSON untuk endpoint yang tidak ditemukan
 
@@ -114,10 +130,16 @@ npx prisma migrate dev --name add-review-model
 npx prisma generate
 ```
 
-3. Set environment variable webhook jika diperlukan:
+3. Untuk testing dummy payment utama, buat order lalu approve sebagai admin:
+
+```bash
+PATCH /api/orders/admin/:id/approve
+```
+
+4. Set environment variable webhook hanya jika ingin menguji simulasi webhook signature:
 
 ```bash
 PAYMENT_WEBHOOK_SECRET=your-secret-key
 ```
 
-4. Test endpoint admin dengan JWT user role `ADMIN`.
+5. Test endpoint admin dengan JWT user role `ADMIN`.

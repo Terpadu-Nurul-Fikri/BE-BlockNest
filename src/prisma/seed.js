@@ -1,6 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
-const bcrypt = require("bcrypt");
-
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
@@ -41,38 +41,46 @@ async function main() {
     {
       name: "Living Room",
       slug: "living-room",
-      description: "Sofas, armchairs, coffee tables, and shelving for daily living.",
-      image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1400&q=85&fit=crop",
+      description:
+        "Sofas, armchairs, coffee tables, and shelving for daily living.",
+      image:
+        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1400&q=85&fit=crop",
     },
     {
       name: "Bedroom",
       slug: "bedroom",
       description: "Low-profile beds, minimal wardrobes, and bedside tables.",
-      image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1400&q=85&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1400&q=85&fit=crop",
     },
     {
       name: "Dining",
       slug: "dining",
-      description: "Dining tables and chairs crafted for comfort and durability.",
-      image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=1400&q=85&fit=crop",
+      description:
+        "Dining tables and chairs crafted for comfort and durability.",
+      image:
+        "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=1400&q=85&fit=crop",
     },
     {
       name: "Office",
       slug: "office",
       description: "Home office desks, chairs, and storage solutions.",
-      image: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1400&q=85&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1400&q=85&fit=crop",
     },
     {
       name: "Outdoor",
       slug: "outdoor",
       description: "Weather-ready furniture for terrace, balcony, and garden.",
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1400&q=85&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1400&q=85&fit=crop",
     },
     {
       name: "Sale",
       slug: "sale",
       description: "Selected end-of-season pieces at reduced prices.",
-      image: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=1400&q=85&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=1400&q=85&fit=crop",
     },
   ];
 
@@ -105,7 +113,8 @@ async function main() {
       categorySlug: "living-room",
       isFeatured: true,
       isNew: false,
-      imageUrl: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop&crop=left",
+      imageUrl:
+        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop&crop=left",
       imageAlt: "Saga modular sofa in natural linen with chaise",
     },
     {
@@ -119,7 +128,8 @@ async function main() {
       categorySlug: "living-room",
       isFeatured: true,
       isNew: true,
-      imageUrl: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80&fit=crop",
+      imageUrl:
+        "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80&fit=crop",
       imageAlt: "Fjord lounge chair with walnut legs",
     },
     {
@@ -133,7 +143,8 @@ async function main() {
       categorySlug: "bedroom",
       isFeatured: true,
       isNew: true,
-      imageUrl: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80&fit=crop",
+      imageUrl:
+        "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80&fit=crop",
       imageAlt: "Lund platform bed frame in smoked oak",
     },
     {
@@ -147,7 +158,8 @@ async function main() {
       categorySlug: "bedroom",
       isFeatured: false,
       isNew: false,
-      imageUrl: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80&fit=crop&crop=right",
+      imageUrl:
+        "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80&fit=crop&crop=right",
       imageAlt: "Hagen bedside table in natural oak",
     },
     {
@@ -161,7 +173,8 @@ async function main() {
       categorySlug: "dining",
       isFeatured: true,
       isNew: false,
-      imageUrl: "https://images.unsplash.com/photo-1549497538-303791108f95?w=600&q=80&fit=crop",
+      imageUrl:
+        "https://images.unsplash.com/photo-1549497538-303791108f95?w=600&q=80&fit=crop",
       imageAlt: "Holm dining table in solid white oak",
     },
     {
@@ -175,7 +188,8 @@ async function main() {
       categorySlug: "dining",
       isFeatured: false,
       isNew: false,
-      imageUrl: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80&fit=crop",
+      imageUrl:
+        "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80&fit=crop",
       imageAlt: "Ris dining chair in upholstered stone linen",
     },
     {
@@ -189,7 +203,8 @@ async function main() {
       categorySlug: "office",
       isFeatured: true,
       isNew: false,
-      imageUrl: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80&fit=crop&crop=right",
+      imageUrl:
+        "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80&fit=crop&crop=right",
       imageAlt: "Birk ergonomic desk chair in molded plywood",
     },
     {
@@ -203,7 +218,8 @@ async function main() {
       categorySlug: "office",
       isFeatured: false,
       isNew: true,
-      imageUrl: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80&fit=crop",
+      imageUrl:
+        "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80&fit=crop",
       imageAlt: "Verk standing desk in solid ash",
     },
     {
@@ -217,7 +233,8 @@ async function main() {
       categorySlug: "outdoor",
       isFeatured: false,
       isNew: true,
-      imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80&fit=crop",
+      imageUrl:
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80&fit=crop",
       imageAlt: "Outdoor teak dining table set in a sunny garden",
     },
     {
@@ -231,7 +248,8 @@ async function main() {
       categorySlug: "outdoor",
       isFeatured: false,
       isNew: false,
-      imageUrl: "https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=600&q=80&fit=crop",
+      imageUrl:
+        "https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=600&q=80&fit=crop",
       imageAlt: "Outdoor lounge chair with weather-resistant cushion",
     },
     {
@@ -245,7 +263,8 @@ async function main() {
       categorySlug: "sale",
       isFeatured: false,
       isNew: false,
-      imageUrl: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&q=80&fit=crop",
+      imageUrl:
+        "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&q=80&fit=crop",
       imageAlt: "Tove pendant light on sale",
     },
     {
@@ -259,7 +278,8 @@ async function main() {
       categorySlug: "sale",
       isFeatured: false,
       isNew: false,
-      imageUrl: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop&crop=bottom",
+      imageUrl:
+        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop&crop=bottom",
       imageAlt: "Alva side table sale price",
     },
   ];
@@ -268,7 +288,9 @@ async function main() {
     const category = categoryBySlug[seed.categorySlug];
 
     if (!category) {
-      console.warn(`⚠️ Skip product ${seed.name}: category ${seed.categorySlug} not found`);
+      console.warn(
+        `⚠️ Skip product ${seed.name}: category ${seed.categorySlug} not found`,
+      );
       continue;
     }
 

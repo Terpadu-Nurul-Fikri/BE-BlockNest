@@ -10,7 +10,7 @@
     "db:studio": "npx prisma studio",
     "db:deploy": "npx prisma migrate deploy",
     "db:seed": "npx prisma db seed",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "debug": "node --watch src/debug.js",
     "seed": "node prisma/seed.js"
   },
@@ -40,7 +40,8 @@
   },
   "devDependencies": {
     "dotenv": "^17.3.1",
-    "prisma": "^7.5.0"
+    "prisma": "^7.5.0",
+    "vitest": "^4.0.15"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

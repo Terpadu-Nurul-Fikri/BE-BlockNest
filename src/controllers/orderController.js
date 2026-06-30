@@ -1,12 +1,22 @@
 import { prisma } from "../config/index.js";
+import { approveOrderWithDummyPayment } from "../services/paymentService.js";
 
 const mapOrder = (order) => {
   if (!order) return order;
 
   const { orderItems = [], totalAmount, ...rest } = order;
 
+  let mappedUser = rest.user;
+  if (rest.user) {
+    mappedUser = {
+      ...rest.user,
+      name: `${rest.user.firstName || ""} ${rest.user.lastName || ""}`.trim(),
+    };
+  }
+
   return {
     ...rest,
+    user: mappedUser,
     totalAmount: totalAmount?.toString?.() ?? totalAmount,
     items: orderItems.map(({ priceAtTime, ...item }) => ({
       ...item,
@@ -16,12 +26,12 @@ const mapOrder = (order) => {
 };
 
 const ORDER_INCLUDE = {
-  user: { select: { id: true, name: true, email: true, phone: true } },
+  user: { select: { id: true, firstName: true, lastName: true, email: true, phone: true } },
   orderItems: { include: { product: { include: { images: true } } } },
 };
 
 const ADMIN_ORDER_INCLUDE = {
-  user: { select: { id: true, name: true, email: true, phone: true } },
+  user: { select: { id: true, firstName: true, lastName: true, email: true, phone: true } },
   orderItems: { include: { product: true } },
 };
 
@@ -199,20 +209,27 @@ export const approveOrder = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const existing = await prisma.order.findUnique({ where: { id } });
-    if (!existing) return res.status(404).json({ error: "Order tidak ditemukan" });
-    if (existing.status !== "PENDING") {
-      return res.status(400).json({ error: "Hanya order PENDING yang bisa di-approve" });
+    const { order, payment } = await approveOrderWithDummyPayment(id, ADMIN_ORDER_INCLUDE);
+
+    res.json({
+      success: true,
+      message: "Pesanan berhasil di-approve",
+      data: {
+        ...mapOrder(order),
+        payment: {
+          id: payment.id,
+          paymentMethod: payment.paymentMethod,
+          paymentStatus: payment.paymentStatus,
+          amount: payment.amount?.toString?.() ?? payment.amount,
+          paidAt: payment.paidAt,
+        },
+      },
+    });
+  } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ error: error.message });
     }
 
-    const order = await prisma.order.update({
-      where: { id },
-      data: { status: "PAID" },
-      include: ADMIN_ORDER_INCLUDE,
-    });
-
-    res.json({ success: true, message: "Pesanan berhasil di-approve", data: mapOrder(order) });
-  } catch (error) {
     console.error("Approve order error:", error);
     res.status(500).json({ error: "Gagal approve pesanan" });
   }

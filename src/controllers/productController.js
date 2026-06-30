@@ -363,3 +363,204 @@ export const getProductsByCategory = async (req, res) => {
         });
     }
 };
+
+export const getProductBySlug = async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const userId = req.user?.id;
+
+        // Fetch product details
+        const product = await prisma.product.findUnique({
+            where: { slug },
+            include: {
+                images: {
+                    orderBy: { sortOrder: "asc" },
+                },
+                category: true,
+            },
+        });
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Produk tidak ditemukan",
+            });
+        }
+
+        // Fetch reviews associated with product
+        const reviews = await prisma.review.findMany({
+            where: { productId: product.id },
+            orderBy: { createdAt: "desc" },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        photoUrl: true,
+                    },
+                },
+            },
+        });
+
+        // Map reviews name dynamically
+        const formattedReviews = reviews.map((r) => ({
+            id: r.id,
+            rating: r.rating,
+            comment: r.comment,
+            createdAt: r.createdAt,
+            updatedAt: r.updatedAt,
+            user: {
+                id: r.user.id,
+                name: `${r.user.firstName || ""} ${r.user.lastName || ""}`.trim(),
+                photoUrl: r.user.photoUrl,
+            },
+        }));
+
+        // Determine if current user can review the product
+        let isEligibleToReview = false;
+        let hasReviewed = false;
+
+        if (userId) {
+            // Check if they purchased the product
+            const orderItem = await prisma.orderItem.findFirst({
+                where: {
+                    productId: product.id,
+                    order: {
+                        userId,
+                        status: { in: ["PAID", "SHIPPED", "COMPLETED"] },
+                    },
+                },
+            });
+            isEligibleToReview = Boolean(orderItem);
+
+            // Check if they already reviewed the product
+            const existingReview = await prisma.review.findFirst({
+                where: {
+                    userId,
+                    productId: product.id,
+                },
+            });
+            hasReviewed = Boolean(existingReview);
+        }
+
+        return res.json({
+            success: true,
+            data: {
+                product: {
+                    ...mapProductForCatalog(product),
+                    categoryId: product.categoryId,
+                    stockQuantity: product.stockQuantity,
+                    images: product.images,
+                    categoryDetail: product.category
+                        ? {
+                            id: product.category.id,
+                            label: product.category.label,
+                            slug: product.category.slug,
+                          }
+                        : null,
+                },
+                reviews: formattedReviews,
+                eligibility: {
+                    isEligibleToReview,
+                    hasReviewed,
+                },
+            },
+        });
+    } catch (error) {
+        console.error("Error fetching product detail by slug:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Terjadi kesalahan pada server",
+        });
+    }
+};
+
+// ── Search Products ─────────────────────────────────────────────────────────
+export const searchProducts = async (req, res) => {
+    try {
+        const q = (req.query.q || "").toString().trim();
+        const limit = Math.min(Number(req.query.limit) || 10, 30);
+
+        if (!q) {
+            return res.json({ success: true, data: [] });
+        }
+
+        const products = await prisma.product.findMany({
+            where: {
+                OR: [
+                    { name: { contains: q, mode: "insensitive" } },
+                    { subCategory: { contains: q, mode: "insensitive" } },
+                    { slug: { contains: q, mode: "insensitive" } },
+                ],
+            },
+            include: {
+                images: {
+                    where: { isPrimary: true },
+                    take: 1,
+                },
+            },
+            take: limit,
+            orderBy: { rating: "desc" },
+        });
+
+        return res.json({
+            success: true,
+            data: products.map(mapProductForCatalog),
+        });
+    } catch (error) {
+        console.error("Error searching products:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Terjadi kesalahan pada server",
+        });
+    }
+};
+
+// ── Get Featured/All Products (for Home page) ────────────────────────────────
+export const getFeaturedProducts = async (req, res) => {
+    try {
+        const page = Math.max(Number(req.query.page) || 1, 1);
+        const limit = Math.min(Number(req.query.limit) || 8, 48);
+        const skip = (page - 1) * limit;
+
+        const [products, total] = await Promise.all([
+            prisma.product.findMany({
+                orderBy: [
+                    { isNew: "desc" },
+                    { rating: "desc" },
+                    { createdAt: "desc" },
+                ],
+                include: {
+                    images: {
+                        where: { isPrimary: true },
+                        take: 1,
+                    },
+                },
+                skip,
+                take: limit,
+            }),
+            prisma.product.count(),
+        ]);
+
+        return res.json({
+            success: true,
+            data: {
+                products: products.map(mapProductForCatalog),
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit),
+                    hasMore: skip + limit < total,
+                },
+            },
+        });
+    } catch (error) {
+        console.error("Error fetching featured products:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Terjadi kesalahan pada server",
+        });
+    }
+};

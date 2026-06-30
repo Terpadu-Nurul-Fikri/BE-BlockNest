@@ -6,10 +6,14 @@ import {
   getProductByIdAdmin,
   getProductsByCategory,
   updateProduct,
+  getProductBySlug,
+  searchProducts,
+  getFeaturedProducts,
 } from "../controllers/productController.js";
 import {
   authMiddleware,
   authorizeRoles,
+  optionalAuthMiddleware,
 } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
@@ -25,4 +29,10 @@ router.delete("/admin/products/:id", ...adminOnly, deleteProduct);
 
 router.get("/category/:slug", ...customerOrAdmin, getProductsByCategory);
 
+// Public routes — no auth needed
+router.get("/products/search", searchProducts);
+router.get("/products/featured", getFeaturedProducts);
+router.get("/products/detail/:slug", optionalAuthMiddleware, getProductBySlug);
+
 export default router;
+

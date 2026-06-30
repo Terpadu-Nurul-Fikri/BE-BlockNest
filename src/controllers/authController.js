@@ -52,7 +52,6 @@ const register = async (req, res) => {
 
     const user = await prisma.user.create({
       data: {
-        name,
         firstName,
         lastName: lastName || null,
         userName: userName || buildUserName(email, firstName),
@@ -192,7 +191,6 @@ const getProfile = async (req, res) => {
       where: { id: req.user.id },
       select: {
         id: true,
-        name: true,
         firstName: true,
         lastName: true,
         userName: true,
@@ -233,7 +231,6 @@ const updateProfile = async (req, res) => {
     if (firstName) {
       updateData.firstName = firstName;
       updateData.lastName = lastName || null;
-      updateData.name = `${firstName} ${lastName || ""}`.trim();
     }
     if (phone !== undefined) {
       updateData.phone = phone;
@@ -256,7 +253,6 @@ const updateProfile = async (req, res) => {
       data: updateData,
       select: {
         id: true,
-        name: true,
         firstName: true,
         lastName: true,
         userName: true,
