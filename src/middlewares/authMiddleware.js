@@ -10,15 +10,9 @@ const getTokenFromRequest = (req) => {
 };
 
 const redirectToLogin = (req, res) => {
-  // Untuk request browser, redirect langsung ke halaman login.
-  if (req.accepts("html")) {
-    return res.redirect("/login");
-  }
-
-  // Untuk API consumer (React/mobile), kirim petunjuk redirect via JSON.
   return res.status(401).json({
-    error: "Silakan login terlebih dahulu",
-    redirectTo: "/login",
+    success: false,
+    message: "Not authenticated, please login",
   });
 };
 

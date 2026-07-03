@@ -171,6 +171,20 @@ model Order {
   totalAmount     Decimal  @map("total_amount") @db.Decimal(12, 2)
   shippingAddress String   @map("shipping_address") @db.Text
   notes           String?  @db.Text
+
+  // Checkout fields
+  shippingName    String?  @map("shipping_name") @db.VarChar(255)
+  shippingPhone   String?  @map("shipping_phone") @db.VarChar(20)
+  shippingCity    String?  @map("shipping_city") @db.VarChar(100)
+  shippingProvince String? @map("shipping_province") @db.VarChar(100)
+  shippingZip     String?  @map("shipping_zip") @db.VarChar(10)
+  shippingCourier String?  @map("shipping_courier") @db.VarChar(50)
+  shippingService String?  @map("shipping_service") @db.VarChar(50)
+  shippingCost    Decimal  @default(0) @map("shipping_cost") @db.Decimal(12, 2)
+  paymentMethod   String?  @map("payment_method") @db.VarChar(50)
+  adminFee        Decimal  @default(0) @map("admin_fee") @db.Decimal(12, 2)
+  grandTotal      Decimal  @default(0) @map("grand_total") @db.Decimal(12, 2)
+
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
