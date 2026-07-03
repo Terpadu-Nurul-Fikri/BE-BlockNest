@@ -15,6 +15,7 @@ import orderRouters from "./routes/orderRoutes.js";
 import cartRouters from "./routes/cartRoutes.js";
 import usersRouters from "./routes/usersRoutes.js";
 import adminRouters from "./routes/adminRoutes.js";
+import checkoutRouters from "./routes/checkoutRoutes.js";
 import { connectDB, disconnectDB } from "./config/index.js";
 import { errorHandler, notFound } from "./utils/errorHandling.js";
 
@@ -64,6 +65,7 @@ app.use("/api/reviews", reviewRouters);
 app.use("/api/orders", orderRouters);
 app.use("/api/cart", cartRouters);
 app.use("/api/users", usersRouters);
+app.use("/api", checkoutRouters);
 app.use("/api/admin", adminRouters);
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 

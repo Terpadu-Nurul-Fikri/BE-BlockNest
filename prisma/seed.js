@@ -113,342 +113,381 @@ const categories = [
 ]
 
 const products = [
-    {
-        publicId: 'meja_makan_f1an7v',
-        name: 'Meja Makan Solid Wood',
-        categorySlug: 'dining',
-        categoryLabel: 'Dining Tables',
-        price: '2450.00',
-        rating: '4.90',
-        reviewCount: 87,
-        isNew: false,
-        stockQuantity: 12,
-        imageAlt: 'Meja makan solid wood'
-    },
-    {
-        publicId: 'lampu_gantung_njeplk',
-        name: 'Lampu Gantung Opal Glass',
-        categorySlug: 'living-room',
-        categoryLabel: 'Lighting',
-        price: '320.00',
-        rating: '4.70',
-        reviewCount: 203,
-        isNew: false,
-        stockQuantity: 24,
-        imageAlt: 'Lampu gantung opal glass'
-    },
-    {
-        publicId: 'meja_rias_mlnjlv',
-        name: 'Meja Rias Minimalis',
-        categorySlug: 'bedroom',
-        categoryLabel: 'Bedroom Tables',
-        price: '690.00',
-        rating: '4.60',
-        reviewCount: 41,
-        isNew: true,
-        stockQuantity: 15,
-        imageAlt: 'Meja rias minimalis'
-    },
-    {
-        publicId: 'Workstation_Office_vuhhjl',
-        name: 'Workstation Office Desk',
-        categorySlug: 'office',
-        categoryLabel: 'Desks',
-        price: '1850.00',
-        rating: '4.80',
-        reviewCount: 77,
-        isNew: true,
-        stockQuantity: 8,
-        imageAlt: 'Workstation office desk'
-    },
-    {
-        publicId: 'Meja_mini_s0osdb',
-        name: 'Meja Mini Side Table',
-        categorySlug: 'living-room',
-        categoryLabel: 'Side Tables',
-        price: '280.00',
-        rating: '4.40',
-        reviewCount: 55,
-        isNew: false,
-        stockQuantity: 30,
-        imageAlt: 'Meja mini side table'
-    },
-    {
-        publicId: 'meja_nakas_iym4yt',
-        name: 'Meja Nakas Oak',
-        categorySlug: 'bedroom',
-        categoryLabel: 'Bedside Tables',
-        price: '310.00',
-        rating: '4.60',
-        reviewCount: 89,
-        isNew: false,
-        stockQuantity: 26,
-        imageAlt: 'Meja nakas oak'
-    },
-    {
-        publicId: 'Fabloft_gtltcg',
-        name: 'Fabloft Accent Chair',
-        categorySlug: 'living-room',
-        categoryLabel: 'Armchairs',
-        price: '1290.00',
-        rating: '4.80',
-        reviewCount: 124,
-        isNew: true,
-        stockQuantity: 9,
-        imageAlt: 'Fabloft accent chair'
-    },
-    {
-        publicId: 'beutiful_woodwork_lemari',
-        name: 'Beautiful Woodwork Wardrobe',
-        categorySlug: 'bedroom',
-        categoryLabel: 'Wardrobes',
-        price: '2100.00',
-        rating: '4.70',
-        reviewCount: 41,
-        isNew: false,
-        stockQuantity: 6,
-        imageAlt: 'Beautiful woodwork wardrobe'
-    },
-    {
-        publicId: 'Rak_abstrak_fjn1dr',
-        name: 'Rak Abstrak Storage Shelf',
-        categorySlug: 'living-room',
-        categoryLabel: 'Storage',
-        price: '780.00',
-        rating: '4.50',
-        reviewCount: 98,
-        isNew: false,
-        stockQuantity: 14,
-        imageAlt: 'Rak abstrak storage shelf'
-    },
+    // ── Living Room ──────────────────────────────────────────────────────────
     {
         publicId: 'Sofa_Putih_axyek6',
-        name: 'Sofa Putih Modular',
+        name: 'Saga Modular Sofa',
+        subCategory: 'Sofas',
         categorySlug: 'living-room',
-        categoryLabel: 'Sofas',
         price: '3200.00',
         rating: '4.60',
         reviewCount: 142,
         isNew: false,
         stockQuantity: 5,
-        imageAlt: 'Sofa putih modular'
+        imageAlt: 'Saga modular sofa in natural linen',
+        imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop&crop=left'
     },
     {
-        publicId: 'Tempat_Tisu_pdnab6',
-        name: 'Tempat Tisu Stone',
+        publicId: 'Fabloft_gtltcg',
+        name: 'Fjord Lounge Chair',
+        subCategory: 'Armchairs',
         categorySlug: 'living-room',
-        categoryLabel: 'Decor',
-        price: '120.00',
-        rating: '4.30',
-        reviewCount: 61,
-        isNew: false,
-        stockQuantity: 40,
-        imageAlt: 'Tempat tisu stone'
-    },
-    {
-        publicId: 'stand_tv_ojiali',
-        name: 'Stand TV Low Cabinet',
-        categorySlug: 'living-room',
-        categoryLabel: 'Storage',
-        price: '1450.00',
-        rating: '4.70',
-        reviewCount: 72,
-        isNew: false,
-        stockQuantity: 11,
-        imageAlt: 'Stand TV low cabinet'
-    },
-    {
-        publicId: 'rak_sepatu_jshhhl',
-        name: 'Rak Sepatu Slim',
-        categorySlug: 'living-room',
-        categoryLabel: 'Storage',
-        price: '390.00',
-        rating: '4.50',
-        reviewCount: 93,
-        isNew: false,
-        stockQuantity: 19,
-        imageAlt: 'Rak sepatu slim'
-    },
-    {
-        publicId: 'lampu_tidur_zbct5z',
-        name: 'Lampu Tidur Warm Glow',
-        categorySlug: 'bedroom',
-        categoryLabel: 'Lighting',
-        price: '140.00',
-        rating: '4.50',
-        reviewCount: 93,
-        isNew: false,
-        stockQuantity: 33,
-        imageAlt: 'Lampu tidur warm glow'
-    },
-    {
-        publicId: 'Kursi_Kecil_nqtiag',
-        name: 'Kursi Kecil Compact',
-        categorySlug: 'dining',
-        categoryLabel: 'Chairs',
-        price: '260.00',
-        rating: '4.70',
-        reviewCount: 63,
-        isNew: true,
-        stockQuantity: 22,
-        imageAlt: 'Kursi kecil compact'
-    },
-    {
-        publicId: 'kursi_kerja_guepi4',
-        name: 'Kursi Kerja Ergonomic',
-        categorySlug: 'office',
-        categoryLabel: 'Chairs',
-        price: '640.00',
-        rating: '4.70',
-        reviewCount: 211,
-        isNew: false,
-        stockQuantity: 17,
-        imageAlt: 'Kursi kerja ergonomic'
-    },
-    {
-        publicId: 'Kitchen_set_lymtfg',
-        name: 'Kitchen Set Natural Oak',
-        categorySlug: 'dining',
-        categoryLabel: 'Kitchen Storage',
-        price: '4200.00',
+        price: '1290.00',
         rating: '4.80',
-        reviewCount: 29,
+        reviewCount: 124,
         isNew: true,
-        stockQuantity: 4,
-        imageAlt: 'Kitchen set natural oak'
-    },
-    {
-        publicId: 'kitchen_set_x1dd7m',
-        name: 'Kitchen Set White Birch',
-        categorySlug: 'dining',
-        categoryLabel: 'Kitchen Storage',
-        price: '3850.00',
-        rating: '4.70',
-        reviewCount: 25,
-        isNew: false,
-        stockQuantity: 7,
-        imageAlt: 'Kitchen set white birch'
-    },
-    {
-        publicId: 'Rak_buku_qwvc43',
-        name: 'Rak Buku Open Shelf',
-        categorySlug: 'living-room',
-        categoryLabel: 'Storage',
-        price: '980.00',
-        rating: '4.60',
-        reviewCount: 88,
-        isNew: false,
-        stockQuantity: 13,
-        imageAlt: 'Rak buku open shelf'
-    },
-    {
-        publicId:
-            'LITFAD_Modern_Upholstered_Rocking_Chair_-_Tufted_Seat_and_Metal_Legs_Stylish_Lounge_Chair_for_Living_Room_Bedroom_-_Coffee_ixdlbc',
-        name: 'LITFAD Modern Rocking Chair',
-        categorySlug: 'living-room',
-        categoryLabel: 'Armchairs',
-        price: '1490.00',
-        rating: '4.80',
-        reviewCount: 52,
-        isNew: true,
-        stockQuantity: 3,
-        imageAlt: 'LITFAD modern upholstered rocking chair'
-    },
-    {
-        publicId: 'Kasur_hitam_kvwwxd',
-        name: 'Kasur Hitam Platform Bed',
-        categorySlug: 'bedroom',
-        categoryLabel: 'Beds',
-        price: '1890.00',
-        rating: '4.90',
-        reviewCount: 56,
-        isNew: true,
-        stockQuantity: 8,
-        imageAlt: 'Kasur hitam platform bed'
-    },
-    {
-        publicId: 'lemari_ueen0p',
-        name: 'Lemari Sliding Wardrobe',
-        categorySlug: 'bedroom',
-        categoryLabel: 'Wardrobes',
-        price: '2350.00',
-        rating: '4.70',
-        reviewCount: 44,
-        isNew: false,
-        stockQuantity: 5,
-        imageAlt: 'Lemari sliding wardrobe'
-    },
-    {
-        publicId: 'Hiasan2_dbgqgx',
-        name: 'Hiasan Dinding Abstract II',
-        categorySlug: 'living-room',
-        categoryLabel: 'Decor',
-        price: '180.00',
-        rating: '4.40',
-        reviewCount: 37,
-        isNew: false,
-        stockQuantity: 42,
-        imageAlt: 'Hiasan dinding abstract II'
-    },
-    {
-        publicId: 'tempat_tidur_dipan_phbr5z',
-        name: 'Tempat Tidur Dipan Oak',
-        categorySlug: 'bedroom',
-        categoryLabel: 'Beds',
-        price: '1720.00',
-        rating: '4.80',
-        reviewCount: 64,
-        isNew: false,
         stockQuantity: 9,
-        imageAlt: 'Tempat tidur dipan oak'
+        imageAlt: 'Fjord lounge chair with walnut legs and cream boucle fabric',
+        imageUrl: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80&fit=crop'
     },
     {
         publicId: 'meja_tamu_hweev1',
-        name: 'Meja Tamu Coffee Table',
+        name: 'Eken Coffee Table',
+        subCategory: 'Tables',
         categorySlug: 'living-room',
-        categoryLabel: 'Coffee Tables',
         price: '590.00',
         rating: '4.80',
         reviewCount: 67,
         isNew: true,
         stockQuantity: 18,
-        imageAlt: 'Meja tamu coffee table'
+        imageAlt: 'Eken coffee table with travertine top and steel frame',
+        imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop&crop=bottom'
     },
     {
-        publicId: 'Hiasan1_rzdnn7',
-        name: 'Hiasan Dinding Abstract I',
+        publicId: 'Rak_abstrak_fjn1dr',
+        name: 'Nord Bookshelf',
+        subCategory: 'Storage',
         categorySlug: 'living-room',
-        categoryLabel: 'Decor',
-        price: '150.00',
-        rating: '4.30',
-        reviewCount: 31,
+        price: '780.00',
+        rating: '4.50',
+        reviewCount: 98,
         isNew: false,
-        stockQuantity: 50,
-        imageAlt: 'Hiasan dinding abstract I'
+        stockQuantity: 14,
+        imageAlt: 'Nord open-back bookshelf in lacquered birch plywood',
+        imageUrl: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80&fit=crop'
     },
     {
-        publicId: 'Minimalist_Headphone_Stand_d0i9ge',
-        name: 'Minimalist Headphone Stand',
-        categorySlug: 'office',
-        categoryLabel: 'Accessories',
-        price: '90.00',
-        rating: '4.60',
-        reviewCount: 73,
+        publicId: 'lampu_gantung_njeplk',
+        name: 'Tove Pendant Light',
+        subCategory: 'Lighting',
+        categorySlug: 'living-room',
+        price: '320.00',
+        rating: '4.70',
+        reviewCount: 203,
         isNew: false,
-        stockQuantity: 60,
-        imageAlt: 'Minimalist headphone stand'
+        stockQuantity: 24,
+        imageAlt: 'Tove pendant light with hand-blown opal glass globe',
+        imageUrl: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&q=80&fit=crop'
     },
     {
-        publicId: 'Minecraft_room_decor__Yes_sirrr_h16gx8',
-        name: 'Minecraft Room Decor',
-        categorySlug: 'sale',
-        categoryLabel: 'Decor',
-        price: '110.00',
-        rating: '4.20',
-        reviewCount: 28,
+        publicId: 'Meja_mini_s0osdb',
+        name: 'Alva Side Table',
+        subCategory: 'Tables',
+        categorySlug: 'living-room',
+        price: '280.00',
+        rating: '4.40',
+        reviewCount: 55,
+        isNew: false,
+        stockQuantity: 30,
+        imageAlt: 'Alva side table in solid ash wood',
+        imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop&crop=right'
+    },
+    // ── Bedroom ──────────────────────────────────────────────────────────────
+    {
+        publicId: 'Kasur_hitam_kvwwxd',
+        name: 'Lund Bed Frame',
+        subCategory: 'Beds',
+        categorySlug: 'bedroom',
+        price: '1890.00',
+        rating: '4.90',
+        reviewCount: 56,
         isNew: true,
-        stockQuantity: 21,
-        imageAlt: 'Minecraft room decor'
+        stockQuantity: 8,
+        imageAlt: 'Lund low-profile platform bed frame in smoked oak',
+        imageUrl: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80&fit=crop'
+    },
+    {
+        publicId: 'meja_nakas_iym4yt',
+        name: 'Hagen Bedside Table',
+        subCategory: 'Bedside Tables',
+        categorySlug: 'bedroom',
+        price: '310.00',
+        rating: '4.60',
+        reviewCount: 89,
+        isNew: false,
+        stockQuantity: 26,
+        imageAlt: 'Hagen bedside table in natural oak',
+        imageUrl: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80&fit=crop&crop=right'
+    },
+    {
+        publicId: 'beutiful_woodwork_lemari',
+        name: 'Nora Wardrobe',
+        subCategory: 'Storage',
+        categorySlug: 'bedroom',
+        price: '2100.00',
+        rating: '4.70',
+        reviewCount: 41,
+        isNew: false,
+        stockQuantity: 6,
+        imageAlt: 'Nora two-door wardrobe in white lacquer',
+        imageUrl: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80&fit=crop'
+    },
+    {
+        publicId: 'lemari_ueen0p',
+        name: 'Berg Blanket Chest',
+        subCategory: 'Storage',
+        categorySlug: 'bedroom',
+        price: '490.00',
+        rating: '4.50',
+        reviewCount: 32,
+        isNew: true,
+        stockQuantity: 11,
+        imageAlt: 'Berg blanket chest in natural linen finish',
+        imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop&crop=bottom'
+    },
+    // ── Dining ───────────────────────────────────────────────────────────────
+    {
+        publicId: 'meja_makan_f1an7v',
+        name: 'Holm Dining Table',
+        subCategory: 'Dining',
+        categorySlug: 'dining',
+        price: '2450.00',
+        rating: '4.90',
+        reviewCount: 87,
+        isNew: false,
+        stockQuantity: 12,
+        imageAlt: 'Holm dining table in solid white oak with tapered legs',
+        imageUrl: 'https://images.unsplash.com/photo-1549497538-303791108f95?w=600&q=80&fit=crop'
+    },
+    {
+        publicId: 'Ris_Dining_Chair',
+        name: 'Ris Dining Chair',
+        subCategory: 'Chairs',
+        categorySlug: 'dining',
+        price: '380.00',
+        rating: '4.70',
+        reviewCount: 116,
+        isNew: false,
+        stockQuantity: 20,
+        imageAlt: 'Ris dining chair in upholstered stone linen',
+        imageUrl: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80&fit=crop'
+    },
+    {
+        publicId: 'Kursi_Kecil_nqtiag',
+        name: 'Sel Bar Stool',
+        subCategory: 'Stools',
+        categorySlug: 'dining',
+        price: '260.00',
+        rating: '4.50',
+        reviewCount: 63,
+        isNew: true,
+        stockQuantity: 22,
+        imageAlt: 'Sel bar stool in natural ash with footrest',
+        imageUrl: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&q=80&fit=crop&crop=right'
+    },
+    {
+        publicId: 'Klar_Sideboard',
+        name: 'Klar Sideboard',
+        subCategory: 'Storage',
+        categorySlug: 'dining',
+        price: '1640.00',
+        rating: '4.80',
+        reviewCount: 49,
+        isNew: false,
+        stockQuantity: 8,
+        imageAlt: 'Klar low sideboard in oiled walnut',
+        imageUrl: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80&fit=crop'
+    },
+    // ── Office ───────────────────────────────────────────────────────────────
+    {
+        publicId: 'kursi_kerja_guepi4',
+        name: 'Birk Desk Chair',
+        subCategory: 'Chairs',
+        categorySlug: 'office',
+        price: '640.00',
+        rating: '4.70',
+        reviewCount: 211,
+        isNew: false,
+        stockQuantity: 17,
+        imageAlt: 'Birk ergonomic desk chair in molded plywood with chrome legs',
+        imageUrl: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80&fit=crop&crop=right'
+    },
+    {
+        publicId: 'Workstation_Office_vuhhjl',
+        name: 'Verk Standing Desk',
+        subCategory: 'Desks',
+        categorySlug: 'office',
+        price: '1850.00',
+        rating: '4.80',
+        reviewCount: 77,
+        isNew: true,
+        stockQuantity: 8,
+        imageAlt: 'Verk height-adjustable desk in solid ash',
+        imageUrl: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80&fit=crop'
+    },
+    {
+        publicId: 'Pin_Monitor_Shelf',
+        name: 'Pin Monitor Shelf',
+        subCategory: 'Accessories',
+        categorySlug: 'office',
+        price: '180.00',
+        rating: '4.40',
+        reviewCount: 139,
+        isNew: false,
+        stockQuantity: 35,
+        imageAlt: 'Pin bamboo monitor shelf with cable slot',
+        imageUrl: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80&fit=crop'
+    },
+    {
+        publicId: 'Ark_Filing_Cabinet',
+        name: 'Ark Filing Cabinet',
+        subCategory: 'Storage',
+        categorySlug: 'office',
+        price: '560.00',
+        rating: '4.30',
+        reviewCount: 44,
+        isNew: false,
+        stockQuantity: 12,
+        imageAlt: 'Ark two-drawer filing cabinet in white lacquer',
+        imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop&crop=left'
+    },
+    // ── Outdoor ──────────────────────────────────────────────────────────────
+    {
+        publicId: 'Sol_Outdoor_Sofa',
+        name: 'Sol Outdoor Sofa',
+        subCategory: 'Sofas',
+        categorySlug: 'outdoor',
+        price: '2800.00',
+        rating: '4.80',
+        reviewCount: 38,
+        isNew: true,
+        stockQuantity: 6,
+        imageAlt: 'Sol outdoor sofa in teak and all-weather canvas',
+        imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80&fit=crop'
+    },
+    {
+        publicId: 'Teak_Dining_Set',
+        name: 'Teak Dining Set',
+        subCategory: 'Dining',
+        categorySlug: 'outdoor',
+        price: '3400.00',
+        rating: '4.90',
+        reviewCount: 22,
+        isNew: false,
+        stockQuantity: 4,
+        imageAlt: 'Outdoor teak dining table with four chairs',
+        imageUrl: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&q=80&fit=crop'
+    },
+    {
+        publicId: 'Kust_Lounger',
+        name: 'Kust Lounger',
+        subCategory: 'Loungers',
+        categorySlug: 'outdoor',
+        price: '890.00',
+        rating: '4.60',
+        reviewCount: 57,
+        isNew: false,
+        stockQuantity: 10,
+        imageAlt: 'Kust teak sun lounger with adjustable back',
+        imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop&crop=right'
+    },
+    {
+        publicId: 'Lykt_Outdoor_Lantern',
+        name: 'Lykt Outdoor Lantern',
+        subCategory: 'Lighting',
+        categorySlug: 'outdoor',
+        price: '140.00',
+        rating: '4.50',
+        reviewCount: 93,
+        isNew: false,
+        stockQuantity: 33,
+        imageAlt: 'Lykt matte black outdoor lantern',
+        imageUrl: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&q=80&fit=crop'
+    },
+    // ── Sale ─────────────────────────────────────────────────────────────────
+    {
+        slug: 'fjord-lounge-chair-sale',
+        publicId: 'Fabloft_gtltcg',
+        name: 'Fjord Lounge Chair',
+        subCategory: 'Armchairs',
+        categorySlug: 'sale',
+        price: '849.00',
+        rating: '4.80',
+        reviewCount: 124,
+        isNew: false,
+        stockQuantity: 9,
+        imageAlt: 'Fjord lounge chair — sale price',
+        imageUrl: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80&fit=crop'
+    },
+    {
+        slug: 'nord-bookshelf-sale',
+        publicId: 'Rak_abstrak_fjn1dr',
+        name: 'Nord Bookshelf',
+        subCategory: 'Storage',
+        categorySlug: 'sale',
+        price: '490.00',
+        rating: '4.50',
+        reviewCount: 98,
+        isNew: false,
+        stockQuantity: 14,
+        imageAlt: 'Nord bookshelf — sale price',
+        imageUrl: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80&fit=crop'
+    },
+    {
+        slug: 'ris-dining-chair-sale',
+        publicId: 'Ris_Dining_Chair',
+        name: 'Ris Dining Chair',
+        subCategory: 'Chairs',
+        categorySlug: 'sale',
+        price: '220.00',
+        rating: '4.70',
+        reviewCount: 116,
+        isNew: false,
+        stockQuantity: 20,
+        imageAlt: 'Ris dining chair — sale price',
+        imageUrl: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80&fit=crop&crop=right'
+    },
+    {
+        slug: 'sel-bar-stool-sale',
+        publicId: 'Kursi_Kecil_nqtiag',
+        name: 'Sel Bar Stool',
+        subCategory: 'Stools',
+        categorySlug: 'sale',
+        price: '170.00',
+        rating: '4.50',
+        reviewCount: 63,
+        isNew: false,
+        stockQuantity: 22,
+        imageAlt: 'Sel bar stool — sale price',
+        imageUrl: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&q=80&fit=crop'
+    },
+    {
+        slug: 'tove-pendant-light-sale',
+        publicId: 'lampu_gantung_njeplk',
+        name: 'Tove Pendant Light',
+        subCategory: 'Lighting',
+        categorySlug: 'sale',
+        price: '199.00',
+        rating: '4.70',
+        reviewCount: 203,
+        isNew: false,
+        stockQuantity: 24,
+        imageAlt: 'Tove pendant light — sale price',
+        imageUrl: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&q=80&fit=crop'
+    },
+    {
+        slug: 'alva-side-table-sale',
+        publicId: 'Meja_mini_s0osdb',
+        name: 'Alva Side Table',
+        subCategory: 'Tables',
+        categorySlug: 'sale',
+        price: '169.00',
+        rating: '4.40',
+        reviewCount: 55,
+        isNew: false,
+        stockQuantity: 30,
+        imageAlt: 'Alva side table — sale price',
+        imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop&crop=bottom'
     }
 ]
 
@@ -457,8 +496,8 @@ function normalizeSlug(value) {
         .toString()
         .trim()
         .toLowerCase()
-        .replace(/\s+/g, '_')        // semua spasi → _
-        .replace(/_+/g, '_')         // multiple _ → single _
+        .replace(/\s+/g, '-')        // semua spasi → -
+        .replace(/-+/g, '-')         // multiple - → single -
         .replace(/[^a-z0-9_-]/g, '')
 }
 
@@ -517,14 +556,15 @@ async function main() {
     const productMap = new Map()
 
     for (const item of products) {
-        const slug = normalizeSlug(item.name)
+        const slug = item.slug || normalizeSlug(item.name)
         const category = categoryMap[item.categorySlug] ?? categoryMap['living-room']
-        const imageUrl = getImageUrl(item.publicId)
+        const imageUrl = item.imageUrl || getImageUrl(item.publicId)
 
         const record = await prisma.product.upsert({
             where: { slug },
             update: {
                 name: item.name,
+                subCategory: item.subCategory || null,
                 price: toMoney(item.price),
                 rating: toRating(item.rating),
                 reviewCount: item.reviewCount,
@@ -535,6 +575,7 @@ async function main() {
             create: {
                 slug,
                 name: item.name,
+                subCategory: item.subCategory || null,
                 price: toMoney(item.price),
                 rating: toRating(item.rating),
                 reviewCount: item.reviewCount,
@@ -544,7 +585,7 @@ async function main() {
             }
         })
 
-        productMap.set(item.publicId, record)
+        productMap.set(item.publicId || slug, record)
 
         const existingImage = await prisma.productImage.findFirst({
             where: {

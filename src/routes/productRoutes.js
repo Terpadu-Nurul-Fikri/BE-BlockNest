@@ -4,9 +4,9 @@ import {
   deleteProduct,
   getAllProductsAdmin,
   getProductByIdAdmin,
+  getProductBySlug,
   getProductsByCategory,
   updateProduct,
-  getProductBySlug,
   searchProducts,
   getFeaturedProducts,
 } from "../controllers/productController.js";
@@ -26,6 +26,8 @@ router.get("/admin/products/:id", ...adminOnly, getProductByIdAdmin);
 router.post("/admin/products", ...adminOnly, createProduct);
 router.put("/admin/products/:id", ...adminOnly, updateProduct);
 router.delete("/admin/products/:id", ...adminOnly, deleteProduct);
+
+router.get("/products/:slug", getProductBySlug);
 
 router.get("/category/:slug", ...customerOrAdmin, getProductsByCategory);
 
